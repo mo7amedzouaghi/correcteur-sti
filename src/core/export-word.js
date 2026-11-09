@@ -102,7 +102,7 @@ function genererDocx(projet, eleve, res) {
   if (res.conseils?.length) corps.push(para(eleve.difficulte ? 'Conseils de remédiation' : 'Conseils', { bold: true, color: BLEU }), ...liste(res.conseils));
   const pens = (res.erreurs || []).filter(e => e.penalite > 0);
   if (pens.length) corps.push(para('Pénalités appliquées', { bold: true, color: BLEU }), ...liste(pens.map(e => `${e.critere ? '[' + e.critere + '] ' : ''}${e.description} (−${fmt(e.penalite)})`)));
-  corps.push(para(`Correction ${res.mode === 'hybride' ? 'hybride (règles automatiques + IA)' : 'automatique (règles)'}${res.valide ? ', validée par l\'enseignant' : ''}.`, { italic: true, size: 16, color: '666666', before: 200 }));
+  corps.push(para(`Correction automatique (règles)${res.valide ? ', validée par l\'enseignant' : ''}.`, { italic: true, size: 16, color: '666666', before: 200 }));
   corps.push(para('Généré avec Correcteur STI — Mohamed Zouaghi', { italic: true, size: 14, color: '999999', before: 0 }));
   corps.push(para(`Nom et signature de l'évaluateur : ${projet.enseignant || '……………………………………'}`, { before: 200 }));
 

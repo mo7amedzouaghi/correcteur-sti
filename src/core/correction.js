@@ -1,5 +1,5 @@
 'use strict';
-// Orchestration de la correction d'un élève : règles (+ IA en mode hybride) -> résultat notable/éditable.
+// Orchestration de la correction d'un élève : règles automatiques -> résultat notable/éditable.
 const { evaluerCritere, detecterErreurs, arrondir, fichiersCorrespondants } = require('./regles');
 const { lireTravail } = require('./eleves');
 
@@ -85,8 +85,7 @@ function commentaireRegles(r, simplifie) {
 }
 
 /**
- * mode : 'auto' (règles seules) ou 'hybride' (règles + IA).
- * opts.ia : fonction async ({...}) => JSON IA (injectée pour pouvoir tester sans réseau).
+ * Correction par règles automatiques ; les critères sans règle sont à noter par l'enseignant.
  */
 async function corrigerEleve(projet, dossierProjet, eleve, opts = {}) {
   const mode = opts.mode || 'auto';
@@ -148,30 +147,8 @@ async function corrigerEleve(projet, dossierProjet, eleve, opts = {}) {
     for (const e of erreurs) res.erreurs.push({ critere: '', description: `${e.type} (${e.fichier}) : ${e.message}`, penalite: 0 });
   }
 
-  if (mode === 'hybride' && opts.ia) {
-    const ia = await opts.ia({ projet, dossierProjet, eleve, travail, resultatsRegles: regles });
-    for (const x of ia.criteres || []) {
-      const rc = res.criteres[x.id];
-      if (!rc) continue;
-      let p = Number(x.points);
-      if (!isFinite(p)) continue;
-      p = Math.min(rc.max, Math.max(0, arrondir(p, ctx.pas)));
-      rc.pointsRegles = rc.points;
-      rc.points = p;
-      rc.source = 'ia';
-      rc.justification = x.justification || '';
-      rc.commentaire = x.commentaire || rc.commentaire;
-      rc.manuel = false;
-    }
-    res.erreurs = (ia.erreurs || []).concat(res.erreurs.filter(e => !e.penalite));
-    totaliser(res, grille);
-    res.appreciation = ia.appreciation;
-    res.pointsForts = ia.pointsForts; res.aAmeliorer = ia.aAmeliorer; res.conseils = ia.conseils;
-    res.usage = ia.usage;
-  } else {
-    totaliser(res, grille);
-    syntheseAuto(res, grille, eleve.difficulte);
-  }
+  totaliser(res, grille);
+  syntheseAuto(res, grille, eleve.difficulte);
   return res;
 }
 

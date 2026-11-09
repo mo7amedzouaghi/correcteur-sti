@@ -1,5 +1,5 @@
 'use strict';
-const { app, BrowserWindow, ipcMain, dialog, shell, safeStorage } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const P = require('../core/projet');
@@ -9,11 +9,10 @@ const { exporterWord } = require('../core/export-word');
 const { exporterExcel } = require('../core/export-excel');
 const { lireJson, verifierGrille } = require('../core/grille');
 
-// mode : « auto » (correcteurAuto) ou « hybride » (hybrideCorrecteur)
+// correcteurAuto : correction par règles automatiques, hors ligne
 const pkg = require('../../package.json');
-const argMode = (process.argv.find(a => a.startsWith('--mode=')) || '').split('=')[1];
-const MODE = argMode || pkg.correcteurMode || 'auto';
-const NOM_APP = MODE === 'hybride' ? 'hybrideCorrecteur' : 'correcteurAuto';
+const MODE = 'auto';
+const NOM_APP = 'correcteurAuto';
 app.setName(NOM_APP);
 
 const DOSSIER_MODELES = path.join(__dirname, '..', '..', 'modeles');
@@ -23,11 +22,6 @@ let enCours = null; // { annule: bool }
 function cheminConfig() { return path.join(app.getPath('userData'), 'config.json'); }
 function lireConfig() { try { return JSON.parse(fs.readFileSync(cheminConfig(), 'utf8')); } catch { return {}; } }
 function ecrireConfig(c) { fs.mkdirSync(path.dirname(cheminConfig()), { recursive: true }); fs.writeFileSync(cheminConfig(), JSON.stringify(c, null, 2)); }
-function cleApi() {
-  const c = lireConfig();
-  if (!c.cleApi) return '';
-  try { return safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(Buffer.from(c.cleApi, 'base64')) : c.cleApi; } catch { return ''; }
-}
 
 function creerFenetre() {
   fenetre = new BrowserWindow({
@@ -75,13 +69,7 @@ const gerer = (canal, fn) => ipcMain.handle(canal, async (_e, ...a) => {
 });
 
 // ---------- application / configuration ----------
-gerer('app:info', () => ({ mode: MODE, nom: NOM_APP, version: pkg.version, cleApi: !!cleApi() || !!process.env.ANTHROPIC_API_KEY }));
-gerer('config:cleApi', cle => {
-  const c = lireConfig();
-  c.cleApi = !cle ? '' : safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(cle).toString('base64') : cle;
-  ecrireConfig(c);
-  return { ok: true };
-});
+gerer('app:info', () => ({ mode: MODE, nom: NOM_APP, version: pkg.version }));
 gerer('config:dernierProjet', () => lireConfig().dernierProjet || null);
 
 // ---------- projet ----------
@@ -152,6 +140,18 @@ gerer('grille:exporterModele', async projet => {
   return { fichier: r.filePath };
 });
 gerer('grille:verifier', projet => verifierGrille(projet.grille));
+gerer('grille:proposer', async (dossier, projet) => {
+  if (!projet.enonce?.texte?.trim()) throw new Error('Déposez d\'abord l\'énoncé (PDF ou Word contenant du texte).');
+  const avecExcel = !!(projet.grille.gabaritExcel && projet.grille.criteres.length);
+  const total = avecExcel ? projet.grille.total : (projet.niveau === 'Bac' && projet.type === 'pratique' ? 40 : 20);
+  const noteSur = projet.grille.noteSur || 20;
+  const { proposerGrille } = require('../core/proposition');
+  const grille = proposerGrille(projet.enonce.texte, { total, noteSur, grilleExistante: avecExcel ? projet.grille : null });
+  const source = 'analyse automatique de l\'énoncé', avertissement = null;
+  if (avecExcel) { grille.gabaritFichier = projet.grille.gabaritFichier; grille.gabaritExcel = projet.grille.gabaritExcel; }
+  projet.grille = grille;
+  return sauverEtRendre(dossier, projet, { verification: verifierGrille(grille), source, avertissement });
+});
 
 // ---------- ressources ----------
 gerer('ressource:ajouter', async (dossier, projet, chemins, categorie) => {
@@ -203,30 +203,16 @@ gerer('correction:lancer', async (dossier, projet, ids) => {
   if (!projet.grille.criteres.length) throw new Error('Aucune grille : déposez ou créez une grille d\'abord.');
   const cibles = projet.eleves.filter(e => !ids || ids.includes(e.id));
   enCours = { annule: false };
-  let iaFn = null, contexte = null;
-  if (MODE === 'hybride') {
-    const ia = require('../core/ia');
-    const cle = cleApi();
-    if (!cle && !process.env.ANTHROPIC_API_KEY) throw new Error('Clé API Claude manquante : renseignez-la dans « Réglages IA ».');
-    contexte = await ia.construireContexte(projet, dossier);
-    iaFn = args => ia.corrigerAvecIA({ ...args, cleApi: cle, contexte });
-    var messageErreur = ia.messageErreur;
-  }
   const bilan = { corriges: 0, erreurs: [] };
   for (let i = 0; i < cibles.length; i++) {
     if (enCours.annule) break;
     const e = cibles[i];
-    fenetre.webContents.send('correction:progres', { i, n: cibles.length, eleve: e.numero, etape: MODE === 'hybride' ? 'règles + IA' : 'règles' });
+    fenetre.webContents.send('correction:progres', { i, n: cibles.length, eleve: e.numero, etape: 'règles' });
     try {
-      projet.resultats[e.id] = await corrigerEleve(projet, dossier, e, { mode: MODE, ia: iaFn });
+      projet.resultats[e.id] = await corrigerEleve(projet, dossier, e, { mode: MODE });
       bilan.corriges++;
     } catch (err) {
-      // en cas d'échec IA : on garde au moins la correction par règles
-      const msg = messageErreur ? messageErreur(err) : err.message;
-      const r = await corrigerEleve(projet, dossier, e, { mode: 'auto' });
-      r.avertissements.push('IA indisponible, correction par règles seulement : ' + msg);
-      projet.resultats[e.id] = r;
-      bilan.erreurs.push(`${e.numero} : ${msg}`);
+      bilan.erreurs.push(`${e.numero} : ${err.message}`);
     }
     P.sauver(dossier, projet);
   }

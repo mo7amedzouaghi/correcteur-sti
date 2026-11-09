@@ -1,9 +1,6 @@
 {
   "appId": "tn.sti.correcteurAuto",
   "productName": "correcteurAuto",
-  "extraMetadata": {
-    "correcteurMode": "auto"
-  },
   "directories": {
     "output": "dist/correcteurAuto"
   },

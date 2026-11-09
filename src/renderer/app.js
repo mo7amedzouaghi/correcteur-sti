@@ -29,7 +29,7 @@ function sauver() {
   minuteur = setTimeout(() => appel('projet:sauver', dossier, projet), 400);
 }
 function aller(vue) {
-  if (!projet && vue !== 'projet' && vue !== 'ia') { toast('Créez ou ouvrez d\'abord un projet.'); return; }
+  if (!projet && vue !== 'projet') { toast('Créez ou ouvrez d\'abord un projet.'); return; }
   $$('#menu button').forEach(b => b.classList.toggle('actif', b.dataset.vue === vue));
   $$('.vue').forEach(v => v.classList.toggle('actif', v.id === 'vue-' + vue));
 }
@@ -42,9 +42,7 @@ function message(cible, msgs) {
   info = await appel('app:info');
   document.title = info.nom;
   $('#nomApp').textContent = info.nom;
-  $('#modeApp').textContent = info.mode === 'hybride' ? 'Règles + IA Claude' : 'Règles automatiques';
-  if (info.mode !== 'hybride') $$('.seulement-hybride').forEach(e => e.classList.add('cache'));
-  $('#etatCle').textContent = info.cleApi ? 'Clé enregistrée ✓' : 'Aucune clé enregistrée';
+  $('#modeApp').textContent = 'Règles automatiques';
   const dernier = await appel('config:dernierProjet');
   if (dernier) { $('#btnDernier').classList.remove('cache'); $('#btnDernier').title = dernier; $('#btnDernier').onclick = () => ouvrir(dernier); }
   const modeles = await appel('grille:modeles') || [];
@@ -96,7 +94,15 @@ function afficherBarre() {
 
 // ---------- dépôts (glisser-déposer) ----------
 const actionsDepot = {
-  enonce: async chemins => prendre(await appel('enonce:deposer', dossier, projet, chemins?.[0])),
+  enonce: async chemins => {
+    const r = prendre(await appel('enonce:deposer', dossier, projet, chemins?.[0]));
+    if (!r) return;
+    // analyse systématique de l'énoncé : proposition de grille si aucune grille n'a encore de règles
+    const g = projet.grille;
+    const sansRegles = !g.criteres.length || g.criteres.every(c => !(c.regles || []).length);
+    if (sansRegles) await proposerGrille(true);
+    else message('#grilleBilan', [['att', 'Nouvel énoncé déposé : cliquez sur « Proposer une grille depuis l\'énoncé » pour remplacer la grille actuelle par une proposition.']]);
+  },
   grille: async chemins => importerGrille(chemins?.[0]),
   ressource: async chemins => prendre(await appel('ressource:ajouter', dossier, projet, chemins, $('#catRessource').value)),
   eleves: async chemins => { const r = prendre(await appel('eleves:importer', dossier, projet, chemins)); if (r) toast(`${projet.eleves.length} élève(s)`); }
@@ -129,8 +135,30 @@ $('#btnOuvrirEnonce').onclick = () => appel('shell:ouvrir', dossier + '/' + proj
 async function importerGrille(chemin) {
   const r = await appel('grille:importer', dossier, projet, chemin, $('#selModele').value || null);
   if (!r) return;
+  messageProposition = [];
   prendre(r); bilanGrille(r.verification);
+  // grille Excel sans modèle : libellés et règles proposés à partir de l'énoncé
+  if (!$('#selModele').value && projet.enonce?.texte && projet.grille.criteres.every(c => !(c.regles || []).length)) await proposerGrille(true);
 }
+async function proposerGrille(auto) {
+  if (!projet.enonce?.texte?.trim()) return toast('Déposez d\'abord l\'énoncé (onglet 2).');
+  const g = projet.grille;
+  const avecRegles = g.criteres.some(c => (c.regles || []).length);
+  if (!auto && avecRegles && !g.gabaritExcel && !window.confirm('Remplacer la grille actuelle par une nouvelle proposition ?')) return;
+  const b = $('#btnProposer');
+  b.disabled = true; b.textContent = '⏳ Analyse de l\'énoncé…';
+  const r = await appel('grille:proposer', dossier, projet);
+  b.disabled = false; b.textContent = '✨ Proposer une grille depuis l\'énoncé';
+  if (!r) return;
+  prendre(r);
+  aller('grille');
+  const m = [['ok', `Grille proposée (${r.source}) : ${projet.grille.criteres.length} critères. Vérifiez et ajustez libellés, barème et règles avant la correction.`]];
+  (projet.grille.remarques || []).slice(1).forEach(x => m.push(['att', x]));
+  if (r.avertissement) m.push(['att', r.avertissement]);
+  messageProposition = m;
+  bilanGrille();
+}
+$('#btnProposer').onclick = () => proposerGrille(false);
 $('#btnGrilleExcel').onclick = () => importerGrille(null);
 $('#btnAppliquerModele').onclick = async () => {
   if (!$('#selModele').value) return toast('Choisissez un modèle dans la liste.');
@@ -148,6 +176,7 @@ $('#btnAjoutCritere').onclick = () => {
   g.total = arr2(g.criteres.reduce((a, c) => a + (+c.points || 0), 0));
   sauver(); afficherGrille();
 };
+let messageProposition = [];
 async function bilanGrille(v) {
   v = v || await appel('grille:verifier', projet);
   if (!v) return;
@@ -155,8 +184,8 @@ async function bilanGrille(v) {
   const sansRegle = g.criteres.filter(c => !(c.regles || []).length).length;
   const m = [[v.problemes.length ? 'att' : 'ok', `${g.criteres.length} critères — somme ${fmt(v.somme)} / total ${fmt(g.total)} — note sur ${g.noteSur}`]];
   v.problemes.forEach(p => m.push(['att', p]));
-  if (sansRegle) m.push(['att', `${sansRegle} critère(s) sans règle automatique : ils seront ${info.mode === 'hybride' ? 'notés par l\'IA' : 'à noter manuellement'}.`]);
-  message('#grilleBilan', m);
+  if (sansRegle) m.push(['att', `${sansRegle} critère(s) sans règle automatique : ils seront à noter manuellement.`]);
+  message('#grilleBilan', [...messageProposition, ...m]);
 }
 function afficherGrille() {
   const g = projet?.grille;
@@ -164,7 +193,7 @@ function afficherGrille() {
   if (!g) { tb.innerHTML = ''; return; }
   tb.innerHTML = g.criteres.map((c, i) => `<tr data-i="${i}">
     <td><input data-k="colonne" value="${esc(c.colonne)}" style="width:52px"></td>
-    <td><input data-k="etape" value="${esc(c.etape)}" style="width:82px"></td>
+    <td><input data-k="etape" value="${esc(c.etape)}" style="width:190px"></td>
     <td><input data-k="question" value="${esc(c.question)}" style="width:40px"></td>
     <td><input data-k="sousQuestion" value="${esc(c.sousQuestion)}" style="width:40px"></td>
     <td><input data-k="libelle" value="${esc(c.libelle)}"></td>
@@ -187,7 +216,7 @@ $('#tabGrille').addEventListener('click', e => {
   if (r != null) {
     const c = projet.grille.criteres[+r];
     ouvrirModal(`Règles automatiques — ${c.id} : ${c.libelle}`,
-      'Types : fichier, regex, html, css, js, ou, et, manuel. Chaque règle a un poids « pts ». Ajoutez « consigne » pour guider l\'IA.',
+      'Types : fichier, regex, html, css, js, ou, et, manuel. Chaque règle a un poids « pts ». « consigne » : précision de correction pour ce critère.',
       JSON.stringify({ consigne: c.consigne || '', regles: c.regles || [] }, null, 2),
       txt => { const o = JSON.parse(txt); c.regles = o.regles || []; c.consigne = o.consigne || undefined; sauver(); afficherGrille(); bilanGrille(); });
   }
@@ -345,12 +374,11 @@ function afficherDetail() {
       lignes += `<tr class="groupe"><td colspan="3">${esc(c.etape)}</td><td>${fmt(cs.reduce((a, x) => a + (r.criteres[x.id]?.points || 0), 0))} / ${fmt(cs.reduce((a, x) => a + x.points, 0))}</td></tr>`;
     }
     const x = r.criteres[c.id] || {};
-    const src = x.source === 'ia' ? '<span class="badge ia">IA</span>' : x.source === 'enseignant' ? '<span class="badge ok">modifié</span>' : x.manuel ? '<span class="badge attention">à saisir</span>' : '';
+    const src = x.source === 'enseignant' ? '<span class="badge ok">modifié</span>' : x.manuel ? '<span class="badge attention">à saisir</span>' : '';
     const regles = (x.details || []).map(dd => `<div class="${dd.ok ? 'okr' : 'ko'}">${dd.ok ? '✓' : '✗'} ${esc(dd.label)} — ${esc(dd.info)}</div>`).join('');
     lignes += `<tr data-c="${esc(c.id)}">
       <td>${esc(c.id)}<br><small>Q${esc(c.question)}${c.sousQuestion ? '-' + esc(c.sousQuestion) : ''}</small></td>
       <td><strong>${esc(c.libelle)}</strong> ${src}
-        ${x.justification ? `<div class="details-regles">IA : ${esc(x.justification)}${x.pointsRegles != null ? ` (règles : ${fmt(x.pointsRegles)})` : ''}</div>` : ''}
         ${regles ? `<details class="details-regles"><summary>Analyse automatique</summary>${regles}</details>` : ''}</td>
       <td style="min-width:220px"><textarea data-k="commentaire" rows="2">${esc(x.commentaire)}</textarea></td>
       <td><input data-k="points" type="number" step="${projet.tolerance.arrondi || 0.25}" min="0" max="${c.points}" class="num" value="${x.points ?? ''}" placeholder="?"> / ${fmt(c.points)}</td></tr>`;
@@ -358,7 +386,7 @@ function afficherDetail() {
   const liste = a => (a || []).join('\n');
   d.innerHTML = `
     <div class="ligne-titre"><div><h2>${esc(e.numero)} — ${esc(nomEleve(e))}</h2>
-      <span class="badge ${r.mode === 'hybride' ? 'ia' : ''}">${r.mode === 'hybride' ? 'règles + IA' : 'règles'}</span>
+      <span class="badge">règles automatiques</span>
       ${e.difficulte ? '<span class="badge attention">correction adaptée</span>' : ''}</div>
       <div class="total-detail" id="totalDetail">${fmt(r.total)} / ${fmt(g.total)} → ${fmt(r.note)} / ${g.noteSur}</div></div>
     ${(r.avertissements || []).map(a => `<div class="msg att">${esc(a)}</div>`).join('')}
@@ -401,12 +429,6 @@ async function corrigerUn(id) {
   if (r) { prendre(r); if (r.bilan.erreurs.length) message('#bilanCorrection', r.bilan.erreurs.map(x => ['att', x])); }
 }
 
-// ---------- réglages IA ----------
-$('#btnCle').onclick = async () => {
-  const cle = $('#cleApi').value.trim();
-  const r = await appel('config:cleApi', cle);
-  if (r) { $('#cleApi').value = ''; $('#etatCle').textContent = cle ? 'Clé enregistrée ✓' : 'Clé supprimée'; toast('Réglage enregistré'); }
-};
 
 // ---------- modal ----------
 function ouvrirModal(titre, aide, texte, ok) {

@@ -20,7 +20,6 @@
       <button data-vue="eleves"><span>5</span>Travaux des élèves</button>
       <button data-vue="tolerance"><span>6</span>Tolérance</button>
       <button data-vue="correction"><span>7</span>Correction &amp; grilles</button>
-      <button data-vue="ia" class="seulement-hybride"><span>⚙</span>Réglages IA</button>
     </nav>
     <div id="infoProjet" class="info-projet">Aucun projet ouvert</div>
     <div class="auteur-app">© Mohamed Zouaghi</div>
@@ -65,8 +64,9 @@
     <!-- 3. GRILLE -->
     <section class="vue" id="vue-grille">
       <h1>Grille de correction</h1>
-      <p class="aide">Téléversez la grille Excel officielle (une colonne par critère, ligne « Détail ») puis appliquez un modèle de règles, ou créez la grille critère par critère.</p>
+      <p class="aide">Une grille est proposée automatiquement dès que l'énoncé est déposé. Vous pouvez aussi téléverser la grille Excel officielle (une colonne par critère, ligne « Détail ») : la proposition garde alors ses colonnes et son barème, et ajoute libellés et règles.</p>
       <div class="actions">
+        <button class="principal" id="btnProposer" title="Analyse l'énoncé déposé et propose critères, barème et règles automatiques">✨ Proposer une grille depuis l'énoncé</button>
         <button class="principal" id="btnGrilleExcel">Téléverser une grille (Excel / JSON)</button>
         <select id="selModele"><option value="">— Modèle de règles —</option></select>
         <button id="btnAppliquerModele">Appliquer le modèle</button>
@@ -78,7 +78,7 @@
       <div class="bandeau" id="grilleBilan"></div>
       <div class="carte tableau-defile">
         <table id="tabGrille">
-          <thead><tr><th>Col.</th><th>Étape</th><th>Q</th><th>Sous-q.</th><th>Critère</th><th>Barème</th><th>Règles auto</th><th></th></tr></thead>
+          <thead><tr><th>Col.</th><th>Partie</th><th>Q</th><th>Sous-q.</th><th>Critère</th><th>Barème</th><th>Règles auto</th><th></th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -87,7 +87,7 @@
     <!-- 4. RESSOURCES -->
     <section class="vue" id="vue-ressources">
       <h1>Ressources</h1>
-      <p class="aide">Corrigé, barème détaillé, fichiers fournis aux élèves, guide STI… Ils servent de référence (et de contexte à l'IA en mode hybride).</p>
+      <p class="aide">Corrigé, barème détaillé, fichiers fournis aux élèves, guide STI… Ils servent de référence pour vérifier et ajuster la grille.</p>
       <div class="actions">
         <select id="catRessource">
           <option value="corrige">Corrigé / barème détaillé</option>
@@ -172,16 +172,6 @@
       </div>
     </section>
 
-    <!-- RÉGLAGES IA -->
-    <section class="vue" id="vue-ia">
-      <h1>Réglages IA (hybrideCorrecteur)</h1>
-      <div class="carte">
-        <p>La correction hybride combine les règles automatiques et le modèle Claude (<code>claude-opus-5-5</code>), qui vérifie chaque critère dans le code ou la copie de l'élève. Toutes les notes restent modifiables avant l'export.</p>
-        <label>Clé API Anthropic<input type="password" id="cleApi" placeholder="sk-ant-…"></label>
-        <div class="actions"><button class="principal" id="btnCle">Enregistrer la clé</button><span id="etatCle"></span></div>
-        <p class="aide">La clé est chiffrée avec le coffre Windows et stockée uniquement sur cet ordinateur. Les travaux des élèves sont envoyés à l'API Claude au moment de la correction.</p>
-      </div>
-    </section>
   </main>
 
   <div id="modal" class="modal cache"><div class="modal-boite">

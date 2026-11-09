@@ -2,10 +2,10 @@
 const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 const canaux = [
-  'app:info', 'config:cleApi', 'config:dernierProjet',
+  'app:info', 'config:dernierProjet',
   'projet:nouveau', 'projet:ouvrir', 'projet:sauver',
   'enonce:deposer',
-  'grille:modeles', 'grille:importer', 'grille:appliquerModele', 'grille:exporterModele', 'grille:verifier',
+  'grille:modeles', 'grille:importer', 'grille:proposer', 'grille:appliquerModele', 'grille:exporterModele', 'grille:verifier',
   'ressource:ajouter', 'ressource:supprimer', 'guide:github',
   'eleves:importer', 'eleves:importerFichiers', 'eleves:liste', 'eleves:supprimer', 'eleves:ouvrirDossier',
   'correction:lancer', 'correction:annuler', 'correction:recalculer',

@@ -40,7 +40,7 @@ const BANNIERE = `<!doctype html><html><head><meta charset="utf-8"><style>
   <div>
     <h1>Correcteur STI</h1>
     <p class="sous">Correction des devoirs pratiques et théoriques<br>Systèmes et Technologies de l'Informatique — 2<sup>e</sup>, 3<sup>e</sup> et Bac</p>
-    <div class="pastilles"><div class="p">correcteurAuto</div><div class="p">hybrideCorrecteur · IA</div><div class="p">Grilles Word &amp; Excel</div></div>
+    <div class="pastilles"><div class="p">correcteurAuto</div><div class="p">Hors ligne</div><div class="p">Grilles Word &amp; Excel</div></div>
     <div class="auteur">Mohamed Zouaghi</div>
   </div>
 </body></html>`;

@@ -106,7 +106,7 @@ function construireGrille(wb, projet, eleves, resultats) {
   ws.getCell(2, 1).alignment = { horizontal: 'center' };
   ws.getCell(3, 1).value = `Etablissement : ${projet.etablissement || ''}    Section : ${projet.section || ''}    Matière : ${projet.matiere || 'S.T.I'}    Date : ${projet.date || ''}`;
   const L = { etape: 5, q: 6, sq: 7, det: 8 };
-  ws.getCell(L.etape, 1).value = 'Barème'; ws.getCell(L.etape, 2).value = 'Etape';
+  ws.getCell(L.etape, 1).value = 'Barème'; ws.getCell(L.etape, 2).value = 'Partie';
   ws.getCell(L.q, 2).value = 'Question'; ws.getCell(L.det, 2).value = 'Détail';
   ws.mergeCells(L.etape, 1, L.det, 1);
   // fusion des en-têtes identiques consécutifs

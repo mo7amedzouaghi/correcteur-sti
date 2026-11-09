@@ -1,34 +1,27 @@
 <p align="center"><img src="build/images/banniere.png" alt="Correcteur STI — Mohamed Zouaghi" width="100%"></p>
 
-# Correcteur STI
+# correcteurAuto — Correcteur STI
 
-Application de bureau (Windows) pour **corriger les devoirs pratiques et théoriques** de la matière
+Application de bureau Windows, **hors ligne**, pour **corriger les devoirs pratiques et théoriques** de la matière
 **Systèmes et Technologies de l'Informatique (STI)** — 2<sup>e</sup>, 3<sup>e</sup> année et Bac Sciences de l'informatique —
 et générer les **grilles d'évaluation détaillées (Word)** et la **grille collective (Excel)**.
-
-Deux versions, un même cœur :
-
-| Application | Correction | Connexion |
-|---|---|---|
-| **correcteurAuto** | règles automatiques (HTML, CSS, JS, PHP, SQL) | hors ligne |
-| **hybrideCorrecteur** | règles automatiques + vérification par l'IA Claude, critère par critère | Internet + clé API Anthropic |
 
 Référence pédagogique : [guide STI](https://github.com/mo7amedzouaghi/guideSTI) (importable dans l'espace Ressources).
 
 ## Télécharger
 
-Les installateurs sont dans la page [**Releases**](https://github.com/mo7amedzouaghi/correcteur-sti/releases/latest) :
-`correcteurAuto-Setup-x.y.z.exe` et `hybrideCorrecteur-Setup-x.y.z.exe`.
+Installateur dans la page [**Releases**](https://github.com/mo7amedzouaghi/correcteur-sti/releases/latest) :
+`correcteurAuto-Setup-x.y.z.exe`.
 
-> Les installateurs ne sont pas signés : si Windows SmartScreen s'affiche, cliquez sur
+> L'installateur n'est pas signé : si Windows SmartScreen s'affiche, cliquez sur
 > **Informations complémentaires → Exécuter quand même**.
 
 ## Fonctionnement
 
 1. **Projet** : titre, niveau (2e, 3e, Bac), type (pratique / théorique), date, évaluateur.
-2. **Énoncé** : déposer le sujet (PDF, Word, texte).
-3. **Grille de correction** : téléverser la grille Excel officielle (une colonne par critère, ligne « Détail »),
-   appliquer un modèle de règles, ou créer la grille critère par critère.
+2. **Énoncé** : déposer le sujet (PDF, Word, texte). **Il est analysé automatiquement et une grille est proposée.**
+3. **Grille de correction** : grille proposée selon la structure du devoir, ou grille Excel officielle téléversée
+   (une colonne par critère, ligne « Détail »), ou modèle de règles, ou création critère par critère.
 4. **Ressources** : corrigé, barème détaillé, fichiers fournis, guide STI (import direct depuis GitHub).
 5. **Travaux des élèves** : un dossier ou une archive `.zip` par élève (ex. `SW123456`), ou un PDF / une image
    par élève pour une copie théorique scannée. Une case **Difficulté** par élève active la correction adaptée.
@@ -36,11 +29,23 @@ Les installateurs sont dans la page [**Releases**](https://github.com/mo7amedzou
 7. **Correction & grilles** : lancer la correction, vérifier et ajuster chaque note, valider, puis générer
    les grilles Word individuelles et la grille collective Excel (le gabarit officiel est rempli, formules conservées).
 
+## Grille proposée à partir de l'énoncé
+
+- **Structure du devoir respectée** : les parties gardent leur nom et leur titre (« Exercice 2 : Contrôle de saisie »,
+  « Partie B : Questions de cours », « Etape 1 : Manipulation de la base de données »…) ; sans parties, la grille est
+  organisée par question. Numérotation 1), 2)… a), b)… reprise du sujet.
+- **Barème** : tableau de points imprimé dans l'énoncé, sinon points annoncés dans les titres (« Exercice 2 (8 points) »),
+  sinon répartition selon le nombre d'éléments à vérifier.
+- **Règles automatiques** selon la nature de la question : fichiers, balises et liens HTML, propriétés CSS,
+  fonctions JavaScript, requêtes SQL / PHP, messages affichés. Les questions de cours sont à noter par l'enseignant.
+- Avec une grille Excel officielle, ses colonnes et son barème sont conservés ; libellés et règles sont proposés.
+
+La proposition est un point de départ : vérifiez libellés, barème et règles avant la correction.
+
 ## Règles de tolérance par défaut
 
 **Tous les élèves**
 - −0,25 par **type** d'erreur sur toute la copie ; une erreur répétée n'est sanctionnée qu'une fois.
-- Pas de pénalité en cascade (une erreur reprise de façon cohérente n'est comptée qu'une fois).
 - Majuscules / minuscules **tolérées partout** (HTML, CSS, JS, PHP, noms de variables et de fichiers).
 - Message affiché **reformulé accepté** s'il est au bon endroit.
 - Solutions équivalentes acceptées : `float` / `flex` / `inline-block` / `margin-left`, sélecteurs combinés (`div h1`),
@@ -64,16 +69,13 @@ Toute grille peut être enregistrée comme nouveau modèle depuis l'application.
 
 ```bash
 npm install
-npm run auto        # lance correcteurAuto
-npm run hybride     # lance hybrideCorrecteur
+npm start           # lance correcteurAuto
 npm test            # test de bout en bout sur 3 élèves fictifs
-npm run dist:auto   # installateur correcteurAuto (dist/)
-npm run dist:hybride
+npm run dist        # installateur Windows (dist/)
 ```
 
-Électron · exceljs · docx · cheerio · SDK Anthropic (`claude-opus-5-5`).
-Les travaux d'élèves et la clé API restent sur l'ordinateur de l'enseignant ; en mode hybride,
-les travaux sont envoyés à l'API Claude au moment de la correction.
+Electron · exceljs · docx · cheerio · mammoth · pdf-parse. Tout fonctionne hors ligne :
+les travaux des élèves restent sur l'ordinateur de l'enseignant.
 
 ---
 

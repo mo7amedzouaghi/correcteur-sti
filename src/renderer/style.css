@@ -61,7 +61,6 @@ tbody tr.cliquable { cursor: pointer; } tbody tr.cliquable:hover td { background
 .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; background: #eef1f6; color: var(--doux); }
 .badge.ok { background: var(--vert-clair); color: var(--vert); }
 .badge.attention { background: var(--orange-clair); color: var(--orange); }
-.badge.ia { background: #efe8fd; color: #6b3fd0; }
 .bandeau { margin: 8px 0; }
 .bandeau:empty { display: none; }
 .bandeau .msg { padding: 9px 12px; border-radius: 8px; margin-bottom: 6px; }

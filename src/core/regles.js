@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Moteur de règles automatiques (utilisé par correcteurAuto ET hybrideCorrecteur).
+ * Moteur de règles automatiques de correcteurAuto.
  *
  * Un critère de la grille possède une liste "regles". Chaque règle a un poids "pts"
  * (relatif : la note du critère = somme des pts obtenus / somme des pts * barème).
@@ -13,7 +13,7 @@
  *  js       { fichier, fonction, motif }        fonction présente (+ motif dans son corps)
  *  ou       { regles[] }                        une des solutions équivalentes suffit
  *  et       { regles[] }                        toutes doivent être vraies
- *  manuel   {}                                  à noter par l'enseignant (ou par l'IA)
+ *  manuel   {}                                  à noter par l'enseignant
  * Option commune : indice (motif regex) => points partiels si tentative visible.
  */
 const vm = require('vm');
