@@ -1,0 +1,1682 @@
+{
+  "nom": "Bac STI 2026 – Séance 1 (Aurythia) – barème officiel",
+  "niveau": "Bac",
+  "type": "pratique",
+  "total": 40,
+  "noteSur": 20,
+  "remarques": [
+    "−0.25 par type d'erreur (une même erreur n'est sanctionnée qu'une fois).",
+    "Casse tolérée partout (HTML, CSS, JS, PHP) ; message affiché reformulé accepté ; mise en page par margin acceptée ; sélecteurs combinés (div h1) acceptés.",
+    "Toute déclaration/expression/fonction non conforme aux documents officiels ne sera pas évaluée.",
+    "Le non-respect de l'emplacement (Q1-a) est sanctionné de 0.25 une seule fois.",
+    "La connexion au serveur + sélection de la base est évaluée une seule fois."
+  ],
+  "criteres": [
+    {
+      "id": "C",
+      "colonne": "C",
+      "etape": "Etape 1",
+      "question": "1",
+      "sousQuestion": "",
+      "libelle": "Création de la base de données BD<n°>",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "ou",
+          "label": "Base BD<n°> créée (en-tête de l'export)",
+          "pts": 1,
+          "regles": [
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "sansCommentaires": false,
+              "motif": "(Base de donn[ée]es|Database)\\s*:\\s*[\\`'\"]?bd\\w*"
+            },
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "CREATE DATABASE[^;]*bd\\w*"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "colonne": "D",
+      "etape": "Etape 1",
+      "question": "2",
+      "sousQuestion": "",
+      "libelle": "Importation du fichier « bijoux.sql »",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "Tables bijou, metal, composition, expert présentes dans l'export",
+          "pts": 1,
+          "fichier": "*.sql",
+          "sansCommentaires": false,
+          "motifs": [
+            "(Base de donn[ée]es|Database)\\s*:",
+            "CREATE TABLE\\s+`?bijou`?",
+            "CREATE TABLE\\s+`?metal`?",
+            "CREATE TABLE\\s+`?composition`?",
+            "CREATE TABLE\\s+`?expert`?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "colonne": "E",
+      "etape": "Etape 1",
+      "question": "3",
+      "sousQuestion": "a",
+      "libelle": "Clés primaires des tables",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "ou",
+          "label": "PK bijou (idBij)",
+          "pts": 1,
+          "regles": [
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "ALTER TABLE\\s+`?bijou`?\\s+ADD PRIMARY KEY\\s*\\(\\s*`?idBij`?\\s*\\)"
+            },
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "CREATE TABLE[^;]*`?bijou`?\\s*\\([^;]*PRIMARY KEY\\s*\\(\\s*`?idBij`?\\s*\\)"
+            }
+          ]
+        },
+        {
+          "type": "ou",
+          "label": "PK metal (idMet)",
+          "pts": 1,
+          "regles": [
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "ALTER TABLE\\s+`?metal`?\\s+ADD PRIMARY KEY\\s*\\(\\s*`?idMet`?\\s*\\)"
+            },
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "CREATE TABLE[^;]*`?metal`?\\s*\\([^;]*PRIMARY KEY\\s*\\(\\s*`?idMet`?\\s*\\)"
+            }
+          ]
+        },
+        {
+          "type": "ou",
+          "label": "PK composition (idBij, idMet)",
+          "pts": 1,
+          "regles": [
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "ALTER TABLE\\s+`?composition`?\\s+ADD PRIMARY KEY\\s*\\(\\s*`?idBij`?\\s*,\\s*`?idMet`?\\s*\\)"
+            },
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "ALTER TABLE\\s+`?composition`?\\s+ADD PRIMARY KEY\\s*\\(\\s*`?idMet`?\\s*,\\s*`?idBij`?\\s*\\)"
+            },
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "CREATE TABLE[^;]*`?composition`?\\s*\\([^;]*PRIMARY KEY\\s*\\(\\s*`?idw+`?\\s*,\\s*`?idw+`?\\s*\\)"
+            }
+          ]
+        },
+        {
+          "type": "ou",
+          "label": "PK expert (idExp)",
+          "pts": 1,
+          "regles": [
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "ALTER TABLE\\s+`?expert`?\\s+ADD PRIMARY KEY\\s*\\(\\s*`?idExp`?\\s*\\)"
+            },
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "CREATE TABLE[^;]*`?expert`?\\s*\\([^;]*PRIMARY KEY\\s*\\(\\s*`?idExp`?\\s*\\)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F",
+      "colonne": "F",
+      "etape": "Etape 1",
+      "question": "3",
+      "sousQuestion": "b",
+      "libelle": "Création de la table « evaluation »",
+      "points": 1,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "CREATE TABLE evaluation",
+          "pts": 1,
+          "fichier": "*.sql",
+          "motif": "CREATE TABLE\\s+`?evaluation`?"
+        },
+        {
+          "type": "regex",
+          "label": "idExp varchar(3) et idBij varchar(5)",
+          "pts": 1,
+          "fichier": "*.sql",
+          "motifs": [
+            "`?idExp`?\\s+(var)?char\\s*\\(\\s*3\\s*\\)",
+            "CREATE TABLE\\s+`?evaluation`?[^;]*`?idBij`?\\s+(var)?char\\s*\\(\\s*5\\s*\\)"
+          ]
+        },
+        {
+          "type": "regex",
+          "label": "finition entier, originalite caractère",
+          "pts": 1,
+          "fichier": "*.sql",
+          "motifs": [
+            "`?finition`?\\s+(tiny|small|medium|big)?int",
+            "`?originalite`?\\s+(var)?char\\s*\\(\\s*1\\s*\\)"
+          ]
+        },
+        {
+          "type": "regex",
+          "label": "commentaire varchar(200), dateEv datetime",
+          "pts": 1,
+          "fichier": "*.sql",
+          "motifs": [
+            "`?commentaire`?\\s+(var)?char\\s*\\(\\s*200\\s*\\)",
+            "`?dateEv`?\\s+(datetime|timestamp)"
+          ]
+        },
+        {
+          "type": "ou",
+          "label": "PK evaluation (idExp, idBij…)",
+          "pts": 1,
+          "regles": [
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "ALTER TABLE\\s+`?evaluation`?\\s+ADD PRIMARY KEY\\s*\\([^)]*idExp[^)]*idBij"
+            },
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "ALTER TABLE\\s+`?evaluation`?\\s+ADD PRIMARY KEY\\s*\\([^)]*idBij[^)]*idExp"
+            },
+            {
+              "type": "regex",
+              "fichier": "*.sql",
+              "motif": "CREATE TABLE\\s+`?evaluation`?[^;]*PRIMARY KEY\\s*\\([^)]*idExp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "G",
+      "colonne": "G",
+      "etape": "Etape 1",
+      "question": "3",
+      "sousQuestion": "c",
+      "libelle": "Relations entre les tables",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "idBij → bijou (composition et evaluation)",
+          "pts": 2,
+          "fichier": "*.sql",
+          "motif": "FOREIGN KEY\\s*\\(\\s*`?idBij`?\\s*\\)\\s*REFERENCES\\s*`?bijou`?",
+          "min": 2,
+          "proportionnel": true,
+          "global": false
+        },
+        {
+          "type": "regex",
+          "label": "idMet → metal",
+          "pts": 1,
+          "fichier": "*.sql",
+          "motif": "FOREIGN KEY\\s*\\(\\s*`?idMet`?\\s*\\)\\s*REFERENCES\\s*`?metal`?"
+        },
+        {
+          "type": "regex",
+          "label": "idExp → expert",
+          "pts": 1,
+          "fichier": "*.sql",
+          "motif": "FOREIGN KEY\\s*\\(\\s*`?idExp`?\\s*\\)\\s*REFERENCES\\s*`?expert`?"
+        }
+      ]
+    },
+    {
+      "id": "H",
+      "colonne": "H",
+      "etape": "Etape 1",
+      "question": "4",
+      "sousQuestion": "",
+      "libelle": "Exportation de la base au format SQL",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "Export contenant la table evaluation",
+          "pts": 1,
+          "fichier": "*.sql",
+          "motifs": [
+            "CREATE TABLE\\s+`?evaluation`?",
+            "CREATE TABLE\\s+`?bijou`?"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "I",
+      "colonne": "I",
+      "etape": "Etape 2",
+      "question": "1",
+      "sousQuestion": "a",
+      "libelle": "header + h1 (texte) + nav + 3 liens (textes, cibles)",
+      "points": 2.25,
+      "regles": [
+        {
+          "type": "html",
+          "label": "header",
+          "fichier": "index.html",
+          "selecteur": "header"
+        },
+        {
+          "type": "html",
+          "label": "h1 « Aurythia : l'art des bijoux »",
+          "fichier": "index.html",
+          "selecteur": "h1",
+          "texte": "aurythia\\s*:?\\s*l.art des bijoux"
+        },
+        {
+          "type": "html",
+          "label": "nav",
+          "fichier": "index.html",
+          "selecteur": "nav"
+        },
+        {
+          "type": "html",
+          "label": "texte « Ajout d'un bijou »",
+          "fichier": "index.html",
+          "selecteur": "nav a, a",
+          "texte": "ajout d.un bijou"
+        },
+        {
+          "type": "html",
+          "label": "texte « Evaluation d'un bijou »",
+          "fichier": "index.html",
+          "selecteur": "nav a, a",
+          "texte": "[ée]valuation d.un bijou"
+        },
+        {
+          "type": "html",
+          "label": "texte « Liste des bijoux originaux »",
+          "fichier": "index.html",
+          "selecteur": "nav a, a",
+          "texte": "liste des bijoux originaux"
+        },
+        {
+          "type": "html",
+          "label": "lien ajout.html + cible iframe",
+          "fichier": "index.html",
+          "selecteur": "a[href*=\"ajout.html\"]",
+          "cibleIframe": true
+        },
+        {
+          "type": "html",
+          "label": "lien evaluation.html + cible iframe",
+          "fichier": "index.html",
+          "selecteur": "a[href*=\"evaluation.html\"]",
+          "cibleIframe": true
+        },
+        {
+          "type": "html",
+          "label": "lien liste.php + cible iframe",
+          "fichier": "index.html",
+          "selecteur": "a[href*=\"liste.php\"]",
+          "cibleIframe": true
+        }
+      ]
+    },
+    {
+      "id": "J",
+      "colonne": "J",
+      "etape": "Etape 2",
+      "question": "1",
+      "sousQuestion": "a",
+      "libelle": "main + section + iframe + aside + img",
+      "points": 1.25,
+      "regles": [
+        {
+          "type": "html",
+          "label": "main",
+          "fichier": "index.html",
+          "selecteur": "main"
+        },
+        {
+          "type": "html",
+          "label": "section dans main",
+          "fichier": "index.html",
+          "selecteur": "main section"
+        },
+        {
+          "type": "html",
+          "label": "iframe (ajout.html par défaut)",
+          "fichier": "index.html",
+          "selecteur": "section iframe[src*=\"ajout.html\"]",
+          "indice": "<iframe"
+        },
+        {
+          "type": "html",
+          "label": "aside",
+          "fichier": "index.html",
+          "selecteur": "main aside, aside"
+        },
+        {
+          "type": "html",
+          "label": "img bijoux.jpg dans aside",
+          "fichier": "index.html",
+          "selecteur": "aside img[src*=\"bijoux.jpg\"]",
+          "indice": "bijoux\\.jpg"
+        }
+      ]
+    },
+    {
+      "id": "K",
+      "colonne": "K",
+      "etape": "Etape 2",
+      "question": "1",
+      "sousQuestion": "a",
+      "libelle": "footer + textes (liste à puces)",
+      "points": 0.75,
+      "regles": [
+        {
+          "type": "html",
+          "label": "footer",
+          "fichier": "index.html",
+          "selecteur": "footer"
+        },
+        {
+          "type": "html",
+          "label": "puce « Numéro Bleu : 82 10 00 00 »",
+          "fichier": "index.html",
+          "selecteur": "footer li",
+          "texte": "num[ée]ro bleu\\s*:?\\s*82\\s*10\\s*00\\s*00"
+        },
+        {
+          "type": "html",
+          "label": "puce « Email : admin@Aurythia.ai »",
+          "fichier": "index.html",
+          "selecteur": "footer li",
+          "texte": "e-?mail\\s*:?\\s*admin@aurythia\\.ai"
+        }
+      ]
+    },
+    {
+      "id": "L",
+      "colonne": "L",
+      "etape": "Etape 2",
+      "question": "1",
+      "sousQuestion": "b",
+      "libelle": "h1 : police Arial + majuscule à chaque mot",
+      "points": 0.75,
+      "regles": [
+        {
+          "type": "css",
+          "label": "Déclaration police Arial",
+          "fichier": "mesStyles.css",
+          "propriete": "font-family|font",
+          "valeur": "arial"
+        },
+        {
+          "type": "css",
+          "label": "Déclaration text-transform capitalize",
+          "fichier": "mesStyles.css",
+          "propriete": "text-transform",
+          "valeur": "capitalize"
+        },
+        {
+          "type": "et",
+          "label": "Application à h1",
+          "regles": [
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "font-family|font",
+              "valeur": "arial",
+              "selecteurs": [
+                "h1"
+              ]
+            },
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "text-transform",
+              "valeur": "capitalize",
+              "selecteurs": [
+                "h1"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "M",
+      "colonne": "M",
+      "etape": "Etape 2",
+      "question": "1",
+      "sousQuestion": "b",
+      "libelle": "header et footer : arrière-plan #053860",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "css",
+          "label": "Déclaration background #053860",
+          "fichier": "mesStyles.css",
+          "propriete": "background(-color)?",
+          "valeur": "#053860"
+        },
+        {
+          "type": "css",
+          "label": "Application header et footer",
+          "fichier": "mesStyles.css",
+          "propriete": "background(-color)?",
+          "valeur": "#053860",
+          "selecteurs": [
+            "header",
+            "footer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "N",
+      "colonne": "N",
+      "etape": "Etape 2",
+      "question": "1",
+      "sousQuestion": "b",
+      "libelle": "a, header et footer : couleur du texte #FFFFFF",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "css",
+          "label": "Déclaration color #FFFFFF",
+          "fichier": "mesStyles.css",
+          "propriete": "color",
+          "valeur": "#fff(fff)?\\b|white|rgb\\(\\s*255\\s*,\\s*255\\s*,\\s*255"
+        },
+        {
+          "type": "css",
+          "label": "Application a, header, footer",
+          "fichier": "mesStyles.css",
+          "propriete": "color",
+          "valeur": "#fff(fff)?\\b|white|rgb\\(\\s*255",
+          "selecteurs": [
+            "a",
+            "header",
+            "footer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "O",
+      "colonne": "O",
+      "etape": "Etape 2",
+      "question": "1",
+      "sousQuestion": "b",
+      "libelle": "nav : marge intérieure 15px",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "css",
+          "label": "Déclaration padding 15px",
+          "fichier": "mesStyles.css",
+          "propriete": "padding",
+          "valeur": "^15(px)?(\\s+15(px)?){0,3}$"
+        },
+        {
+          "type": "css",
+          "label": "Application nav",
+          "fichier": "mesStyles.css",
+          "propriete": "padding",
+          "valeur": "15",
+          "selecteurs": [
+            "nav"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P",
+      "colonne": "P",
+      "etape": "Etape 2",
+      "question": "1",
+      "sousQuestion": "b",
+      "libelle": "section à gauche (même ligne)",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "ou",
+          "regles": [
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "float",
+              "valeur": "left"
+            },
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "display",
+              "valeur": "inline-block|table-cell"
+            },
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "display",
+              "valeur": "flex|grid",
+              "selecteurs": [
+                "main"
+              ]
+            }
+          ],
+          "label": "Déclaration (gauche)",
+          "pts": 1,
+          "souple": {
+            "type": "css",
+            "fichier": "mesStyles.css",
+            "propriete": "margin(-left|-right)?",
+            "valeur": "\\d",
+            "selecteurs": [
+              "section|aside"
+            ],
+            "label": "mise en page par margin acceptée"
+          }
+        },
+        {
+          "type": "ou",
+          "label": "Application à section",
+          "pts": 1,
+          "souple": {
+            "type": "css",
+            "fichier": "mesStyles.css",
+            "propriete": "margin(-left|-right)?",
+            "valeur": "\\d",
+            "selecteurs": [
+              "section"
+            ],
+            "label": "margin sur section accepté"
+          },
+          "regles": [
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "float",
+              "valeur": "left",
+              "selecteurs": [
+                "section"
+              ]
+            },
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "display",
+              "valeur": "inline-block|table-cell",
+              "selecteurs": [
+                "section"
+              ]
+            },
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "display",
+              "valeur": "flex|grid",
+              "selecteurs": [
+                "main"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q",
+      "colonne": "Q",
+      "etape": "Etape 2",
+      "question": "1",
+      "sousQuestion": "b",
+      "libelle": "aside à droite de section",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "ou",
+          "label": "Déclaration (droite)",
+          "pts": 1,
+          "souple": {
+            "type": "css",
+            "fichier": "mesStyles.css",
+            "propriete": "margin(-left|-right)?",
+            "valeur": "\\d",
+            "selecteurs": [
+              "aside"
+            ],
+            "label": "margin-left sur aside accepté"
+          },
+          "regles": [
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "float",
+              "valeur": "right|left"
+            },
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "display",
+              "valeur": "inline-block|table-cell"
+            },
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "display",
+              "valeur": "flex|grid",
+              "selecteurs": [
+                "main"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "ou",
+          "label": "Application à aside",
+          "pts": 1,
+          "souple": {
+            "type": "css",
+            "fichier": "mesStyles.css",
+            "propriete": "margin(-left|-right)?",
+            "valeur": "\\d",
+            "selecteurs": [
+              "aside"
+            ],
+            "label": "margin sur aside accepté"
+          },
+          "regles": [
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "float",
+              "valeur": "right|left",
+              "selecteurs": [
+                "aside"
+              ]
+            },
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "display",
+              "valeur": "inline-block|table-cell",
+              "selecteurs": [
+                "aside"
+              ]
+            },
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "display",
+              "valeur": "flex|grid",
+              "selecteurs": [
+                "main"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R",
+      "colonne": "R",
+      "etape": "Etape 2",
+      "question": "1",
+      "sousQuestion": "b",
+      "libelle": "ul : style de puce carré",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "css",
+          "label": "Déclaration list-style square",
+          "fichier": "mesStyles.css",
+          "propriete": "list-style(-type)?",
+          "valeur": "square"
+        },
+        {
+          "type": "css",
+          "label": "Application ul",
+          "fichier": "mesStyles.css",
+          "propriete": "list-style(-type)?",
+          "valeur": "square",
+          "selecteurs": [
+            "ul|li"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S",
+      "colonne": "S",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "a",
+      "libelle": "Liaison JS et CSS",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "html",
+          "label": "lien mesStyles.css",
+          "fichier": "ajout.html",
+          "selecteur": "link[href*=\"mesStyles.css\" i]"
+        },
+        {
+          "type": "html",
+          "label": "script mesControles.js",
+          "fichier": "ajout.html",
+          "selecteur": "script[src*=\"mesControles.js\" i]"
+        }
+      ]
+    },
+    {
+      "id": "T",
+      "colonne": "T",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "a",
+      "libelle": "Propriétés du formulaire (post, ajout.php, return valide1())",
+      "points": 0.75,
+      "regles": [
+        {
+          "type": "html",
+          "label": "method=\"post\"",
+          "fichier": "ajout.html",
+          "selecteur": "form[method=\"post\" i]"
+        },
+        {
+          "type": "html",
+          "label": "action=\"ajout.php\"",
+          "fichier": "ajout.html",
+          "selecteur": "form[action*=\"ajout.php\"]"
+        },
+        {
+          "type": "html",
+          "label": "onsubmit=\"return valide1()\"",
+          "fichier": "ajout.html",
+          "selecteur": "form",
+          "motif": "onsubmit\\s*=\\s*[\"']\\s*return\\s+valide1\\s*\\(\\s*\\)"
+        }
+      ]
+    },
+    {
+      "id": "U",
+      "colonne": "U",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "a",
+      "libelle": "Attribut required (Description)",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "html",
+          "label": "required sur la description",
+          "fichier": "ajout.html",
+          "selecteur": "[required]",
+          "motif": "desc"
+        }
+      ]
+    },
+    {
+      "id": "V",
+      "colonne": "V",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "b",
+      "libelle": "fieldset : bordure double #0000FF 3px",
+      "points": 1,
+      "regles": [
+        {
+          "type": "css",
+          "label": "couleur #0000FF",
+          "fichier": "mesStyles.css",
+          "propriete": "border(-color)?",
+          "valeur": "#0000ff|#00f\\b|blue"
+        },
+        {
+          "type": "css",
+          "label": "épaisseur 3px",
+          "fichier": "mesStyles.css",
+          "propriete": "border(-width)?",
+          "valeur": "3px"
+        },
+        {
+          "type": "css",
+          "label": "style double",
+          "fichier": "mesStyles.css",
+          "propriete": "border(-style)?",
+          "valeur": "double"
+        },
+        {
+          "type": "css",
+          "label": "Application aux fieldset",
+          "fichier": "mesStyles.css",
+          "propriete": "border(-style)?",
+          "valeur": "double",
+          "selecteurs": [
+            "fieldset"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "W",
+      "colonne": "W",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "b",
+      "libelle": "Boutons : ombre bleue 5px 5px",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "css",
+          "label": "Déclaration box-shadow 5px 5px bleu",
+          "fichier": "mesStyles.css",
+          "propriete": "box-shadow",
+          "valeur": "5px\\s+5px.*(blue|#0000ff|#00f\\b)|(blue|#0000ff|#00f\\b).*5px\\s+5px"
+        },
+        {
+          "type": "css",
+          "label": "Application aux boutons",
+          "fichier": "mesStyles.css",
+          "propriete": "box-shadow",
+          "valeur": "5px",
+          "selecteurs": [
+            "(input|button|\\.|#)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "X",
+      "colonne": "X",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "c",
+      "libelle": "valide1 : identifiant (2 lettres + 3 chiffres)",
+      "points": 1.25,
+      "regles": [
+        {
+          "type": "js",
+          "label": "fonction valide1",
+          "fichier": "mesControles.js",
+          "fonction": "valide1"
+        },
+        {
+          "type": "js",
+          "label": "test de longueur = 5",
+          "fichier": "mesControles.js",
+          "fonction": "valide1",
+          "motif": "length\\s*(!==?|===?|<|>)\\s*5|\\{2\\}.*\\{3\\}",
+          "indice": "length"
+        },
+        {
+          "type": "js",
+          "label": "test des 2 lettres",
+          "fichier": "mesControles.js",
+          "fonction": "valide1",
+          "motif": "[\"']a[\"']|[\"']A[\"']|toUpperCase|toLowerCase|\\[a-z|\\[A-Z",
+          "indice": "charAt|\\[0\\]"
+        },
+        {
+          "type": "js",
+          "label": "test des 3 chiffres",
+          "fichier": "mesControles.js",
+          "fonction": "valide1",
+          "motif": "[\"']0[\"']|[\"']9[\"']|isNaN|\\\\d|\\[0-9|Number\\(|parseInt"
+        },
+        {
+          "type": "js",
+          "label": "blocage (return false)",
+          "fichier": "mesControles.js",
+          "fonction": "valide1",
+          "motif": "return\\s+false"
+        }
+      ]
+    },
+    {
+      "id": "Y",
+      "colonne": "Y",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "c",
+      "libelle": "valide1 : prix ≥ 100 + arrière-plan rouge",
+      "points": 1.5,
+      "regles": [
+        {
+          "type": "js",
+          "label": "test prix ≥ 100",
+          "fichier": "mesControles.js",
+          "fonction": "valide1",
+          "motif": "(<|>=|<=|>)\\s*100\\b|100\\s*(<|>|<=|>=)",
+          "indice": "prix"
+        },
+        {
+          "type": "js",
+          "label": "style.background rouge",
+          "fichier": "mesControles.js",
+          "fonction": "valide1",
+          "motif": "style\\.background(Color)?\\s*=\\s*[\"'](red|#f00\\b|#ff0000)",
+          "indice": "style\\."
+        }
+      ]
+    },
+    {
+      "id": "Z",
+      "colonne": "Z",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "c",
+      "libelle": "valide1 : sélection d'au moins un métal",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "js",
+          "label": "test checked",
+          "fichier": "mesControles.js",
+          "fonction": "valide1",
+          "motif": "\\.checked|:checked"
+        }
+      ]
+    },
+    {
+      "id": "AA",
+      "colonne": "AA",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "d",
+      "libelle": "ajout.php : récupération des données",
+      "points": 1.5,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "4 champs du fieldset Détails ($_POST)",
+          "pts": 4,
+          "fichier": "ajout.php",
+          "motif": "\\$_(POST|REQUEST)\\s*\\[",
+          "min": 5,
+          "proportionnel": true
+        },
+        {
+          "type": "regex",
+          "label": "Composition (tableau de cases à cocher parcouru)",
+          "pts": 2,
+          "fichier": "ajout.php",
+          "motif": "foreach|for\\s*\\(|count\\s*\\(|sizeof\\s*\\("
+        }
+      ]
+    },
+    {
+      "id": "AB",
+      "colonne": "AB",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "d",
+      "libelle": "Connexion au serveur + choix de la base (évaluée une seule fois)",
+      "points": 1,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "connexion au serveur",
+          "fichier": "*.php",
+          "motif": "mysqli_connect|new\\s+mysqli|new\\s+PDO|mysql_connect",
+          "global": true
+        },
+        {
+          "type": "regex",
+          "label": "sélection de la base BD<n°>",
+          "fichier": "*.php",
+          "motif": "mysqli_select_db|select_db|dbname\\s*=|mysqli_connect\\s*\\([^)]*,[^)]*,[^)]*,[^)]*\\)|new\\s+mysqli\\s*\\([^)]*,[^)]*,[^)]*,[^)]*\\)",
+          "global": true
+        }
+      ]
+    },
+    {
+      "id": "AC",
+      "colonne": "AC",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "d",
+      "libelle": "Requête INSERT bijou (requête + exécution)",
+      "points": 1.25,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "INSERT INTO bijou",
+          "pts": 4,
+          "fichier": "ajout.php",
+          "motif": "insert\\s+into\\s+`?bijou`?"
+        },
+        {
+          "type": "regex",
+          "label": "exécution",
+          "pts": 1,
+          "fichier": "ajout.php",
+          "motif": "(mysqli_query|->\\s*query|->\\s*exec|->\\s*execute|mysql_query)"
+        }
+      ]
+    },
+    {
+      "id": "AD",
+      "colonne": "AD",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "d",
+      "libelle": "INSERT composition (requête + exécution)",
+      "points": 1.25,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "INSERT INTO composition",
+          "pts": 4,
+          "fichier": "ajout.php",
+          "motif": "insert\\s+into\\s+`?composition`?"
+        },
+        {
+          "type": "regex",
+          "label": "exécution (2e requête)",
+          "pts": 1,
+          "fichier": "ajout.php",
+          "motif": "(mysqli_query|->\\s*query|->\\s*exec|->\\s*execute|mysql_query)",
+          "min": 2
+        }
+      ]
+    },
+    {
+      "id": "AE",
+      "colonne": "AE",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "d",
+      "libelle": "Message « Ajout effectué avec succès »",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "message de succès",
+          "souple": {
+            "type": "regex",
+            "fichier": "ajout.php",
+            "motif": "\\b(echo|print)\\b",
+            "min": 1,
+            "label": "message reformulé accepté"
+          },
+          "fichier": "ajout.php",
+          "motif": "ajout effectu[ée] avec succ[èe]s"
+        }
+      ]
+    },
+    {
+      "id": "AF",
+      "colonne": "AF",
+      "etape": "Etape 2",
+      "question": "2",
+      "sousQuestion": "d",
+      "libelle": "Message « Erreur d'insertion »",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "message d'erreur",
+          "souple": {
+            "type": "regex",
+            "fichier": "ajout.php",
+            "motif": "\\b(echo|print)\\b",
+            "min": 2,
+            "label": "message reformulé accepté"
+          },
+          "fichier": "ajout.php",
+          "motif": "erreur d.insertion"
+        }
+      ]
+    },
+    {
+      "id": "AG",
+      "colonne": "AG",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "a",
+      "libelle": "Formulaire (post, evaluation.php, return valide2())",
+      "points": 0.75,
+      "regles": [
+        {
+          "type": "html",
+          "label": "method=\"post\"",
+          "fichier": "evaluation.html",
+          "selecteur": "form[method=\"post\" i]"
+        },
+        {
+          "type": "html",
+          "label": "action=\"evaluation.php\"",
+          "fichier": "evaluation.html",
+          "selecteur": "form[action*=\"evaluation.php\"]"
+        },
+        {
+          "type": "html",
+          "label": "onsubmit=\"return valide2()\"",
+          "fichier": "evaluation.html",
+          "selecteur": "form",
+          "motif": "onsubmit\\s*=\\s*[\"']\\s*return\\s+valide2\\s*\\(\\s*\\)"
+        }
+      ]
+    },
+    {
+      "id": "AH",
+      "colonne": "AH",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "a",
+      "libelle": "Éléments graphiques du formulaire",
+      "points": 1.5,
+      "regles": [
+        {
+          "type": "et",
+          "label": "2 fieldset avec légendes",
+          "regles": [
+            {
+              "type": "html",
+              "fichier": "evaluation.html",
+              "selecteur": "fieldset",
+              "min": 2
+            },
+            {
+              "type": "html",
+              "fichier": "evaluation.html",
+              "selecteur": "legend",
+              "min": 2
+            }
+          ]
+        },
+        {
+          "type": "html",
+          "label": "2 zones de saisie (identifiant + commentaire) avec labels",
+          "fichier": "evaluation.html",
+          "selecteur": "input[type=\"text\"], input:not([type]), textarea",
+          "min": 2,
+          "proportionnel": true
+        },
+        {
+          "type": "html",
+          "label": "liste déroulante (select) avec label",
+          "fichier": "evaluation.html",
+          "selecteur": "select"
+        },
+        {
+          "type": "html",
+          "label": "zone number avec label",
+          "fichier": "evaluation.html",
+          "selecteur": "input[type=\"number\"]"
+        },
+        {
+          "type": "html",
+          "label": "2 boutons radio avec labels",
+          "fichier": "evaluation.html",
+          "selecteur": "input[type=\"radio\"]",
+          "min": 2,
+          "proportionnel": true
+        },
+        {
+          "type": "html",
+          "label": "2 boutons",
+          "fichier": "evaluation.html",
+          "selecteur": "input[type=\"submit\"], input[type=\"reset\"], input[type=\"button\"], button",
+          "min": 2,
+          "proportionnel": true
+        }
+      ]
+    },
+    {
+      "id": "AI",
+      "colonne": "AI",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "a",
+      "libelle": "Éléments de la liste déroulante (A22, A23, A24)",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "html",
+          "label": "Chokri Sfaxi = A22",
+          "fichier": "evaluation.html",
+          "selecteur": "option[value=\"A22\" i]",
+          "texte": "chokri"
+        },
+        {
+          "type": "html",
+          "label": "Mohamed Jerbi = A23",
+          "fichier": "evaluation.html",
+          "selecteur": "option[value=\"A23\" i]",
+          "texte": "mohamed"
+        },
+        {
+          "type": "html",
+          "label": "Radhia Gafsi = A24",
+          "fichier": "evaluation.html",
+          "selecteur": "option[value=\"A24\" i]",
+          "texte": "radhia"
+        }
+      ]
+    },
+    {
+      "id": "AJ",
+      "colonne": "AJ",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "b",
+      "libelle": "fieldset : gras + italique",
+      "points": 0.75,
+      "regles": [
+        {
+          "type": "css",
+          "label": "Déclaration gras",
+          "fichier": "mesStyles.css",
+          "propriete": "font-weight|font",
+          "valeur": "bold|[6-9]00"
+        },
+        {
+          "type": "css",
+          "label": "Déclaration italique",
+          "fichier": "mesStyles.css",
+          "propriete": "font-style|font",
+          "valeur": "italic"
+        },
+        {
+          "type": "css",
+          "label": "Application aux fieldset",
+          "fichier": "mesStyles.css",
+          "propriete": "font-style|font",
+          "valeur": "italic",
+          "selecteurs": [
+            "fieldset|legend|form"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AK",
+      "colonne": "AK",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "b",
+      "libelle": "Application aux deux boutons",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "ou",
+          "label": "Style appliqué aux boutons de evaluation.html",
+          "regles": [
+            {
+              "type": "css",
+              "fichier": "mesStyles.css",
+              "propriete": "font-weight|font-style|box-shadow",
+              "selecteurs": [
+                "(input|button|\\.|#)"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "html",
+          "label": "evaluation.html liée à mesStyles.css",
+          "fichier": "evaluation.html",
+          "selecteur": "link[href*=\"mesStyles.css\" i]"
+        }
+      ]
+    },
+    {
+      "id": "AL",
+      "colonne": "AL",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "c",
+      "libelle": "valide2 : appel du contrôle de l'identifiant",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "js",
+          "label": "contrôle de l'identifiant réutilisé",
+          "fichier": "mesControles.js",
+          "fonction": "valide2",
+          "motif": "length\\s*(!==?|===?)\\s*5|\\b(?!(?:alert|getElementById|parseInt|parseFloat|Number|isNaN|charAt|toUpperCase|toLowerCase|substr\\w*|slice|indexOf|split|trim|focus|if|for|while|switch|return|function|valide2)\\b)[a-zA-Z_]\\w*\\s*\\("
+        }
+      ]
+    },
+    {
+      "id": "AM",
+      "colonne": "AM",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "c",
+      "libelle": "valide2 : sélection d'un expert",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "js",
+          "label": "test selectedIndex / valeur vide",
+          "fichier": "mesControles.js",
+          "fonction": "valide2",
+          "motif": "selectedIndex|\\.value\\s*(==|===)\\s*[\"']{2}|==\\s*-1"
+        }
+      ]
+    },
+    {
+      "id": "AN",
+      "colonne": "AN",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "c",
+      "libelle": "valide2 : finition entier entre 1 et 5",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "js",
+          "label": "test 1 ≤ finition ≤ 5",
+          "fichier": "mesControles.js",
+          "fonction": "valide2",
+          "motif": "(<|<=|>=|>)\\s*[15]\\b"
+        }
+      ]
+    },
+    {
+      "id": "AO",
+      "colonne": "AO",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "c",
+      "libelle": "valide2 : sélection de l'originalité",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "js",
+          "label": "test checked (radios)",
+          "fichier": "mesControles.js",
+          "fonction": "valide2",
+          "motif": "\\.checked"
+        }
+      ]
+    },
+    {
+      "id": "AP",
+      "colonne": "AP",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "c",
+      "libelle": "valide2 : commentaire (≥ 2 mots, lettres uniquement)",
+      "points": 2,
+      "regles": [
+        {
+          "type": "js",
+          "label": "découpage en mots (espaces)",
+          "fichier": "mesControles.js",
+          "fonction": "valide2",
+          "motif": "split\\s*\\(|==\\s*[\"'] [\"']|indexOf\\s*\\(\\s*[\"'] [\"']",
+          "indice": "commentaire"
+        },
+        {
+          "type": "js",
+          "label": "au moins 2 mots",
+          "fichier": "mesControles.js",
+          "fonction": "valide2",
+          "motif": "(<|>=)\\s*2\\b|nb\\w*\\s*(<|>=)|length\\s*<\\s*2"
+        },
+        {
+          "type": "js",
+          "label": "chaque mot formé de lettres",
+          "fichier": "mesControles.js",
+          "fonction": "valide2",
+          "motif": "[\"']a[\"']|[\"']A[\"']|[\"']z[\"']|[\"']Z[\"']|toUpperCase|\\[a-z|\\[A-Z",
+          "indice": "for|while"
+        },
+        {
+          "type": "js",
+          "label": "blocage (return false)",
+          "fichier": "mesControles.js",
+          "fonction": "valide2",
+          "motif": "return\\s+false"
+        }
+      ]
+    },
+    {
+      "id": "AQ",
+      "colonne": "AQ",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "d",
+      "libelle": "evaluation.php : récupération des données",
+      "points": 1.25,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "5 champs ($_POST)",
+          "fichier": "evaluation.php",
+          "motif": "\\$_(POST|REQUEST)\\s*\\[",
+          "min": 5,
+          "proportionnel": true
+        }
+      ]
+    },
+    {
+      "id": "AR",
+      "colonne": "AR",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "d",
+      "libelle": "Vérification de l'existence du bijou (SELECT + exécution + test)",
+      "points": 2,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "SELECT … FROM bijou WHERE idBij",
+          "pts": 6,
+          "fichier": "evaluation.php",
+          "motif": "select[\\s\\S]{0,200}?from\\s+`?bijou`?[\\s\\S]{0,200}?where"
+        },
+        {
+          "type": "regex",
+          "label": "exécution",
+          "pts": 1,
+          "fichier": "evaluation.php",
+          "motif": "(mysqli_query|->\\s*query|->\\s*exec|->\\s*execute|mysql_query)"
+        },
+        {
+          "type": "regex",
+          "label": "test du résultat",
+          "pts": 1,
+          "fichier": "evaluation.php",
+          "motif": "num_rows|rowCount|fetch"
+        }
+      ]
+    },
+    {
+      "id": "AS",
+      "colonne": "AS",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "d",
+      "libelle": "Message « Bijou inexistant »",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "message",
+          "souple": {
+            "type": "regex",
+            "fichier": "evaluation.php",
+            "motif": "\\b(echo|print)\\b",
+            "min": 1,
+            "label": "message reformulé accepté"
+          },
+          "fichier": "evaluation.php",
+          "motif": "bijou inexistant"
+        }
+      ]
+    },
+    {
+      "id": "AT",
+      "colonne": "AT",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "d",
+      "libelle": "Vérification de l'évaluation par l'expert (SELECT + exécution + test)",
+      "points": 2,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "SELECT … FROM evaluation WHERE",
+          "pts": 6,
+          "fichier": "evaluation.php",
+          "motif": "select[\\s\\S]{0,200}?from\\s+`?evaluation`?[\\s\\S]{0,300}?where"
+        },
+        {
+          "type": "regex",
+          "label": "exécution",
+          "pts": 1,
+          "fichier": "evaluation.php",
+          "motif": "(mysqli_query|->\\s*query|->\\s*exec|->\\s*execute|mysql_query)",
+          "min": 2
+        },
+        {
+          "type": "regex",
+          "label": "test du résultat",
+          "pts": 1,
+          "fichier": "evaluation.php",
+          "motif": "num_rows|rowCount|fetch",
+          "min": 2
+        }
+      ]
+    },
+    {
+      "id": "AU",
+      "colonne": "AU",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "d",
+      "libelle": "Message « Bijou déjà évalué … »",
+      "points": 0.25,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "message",
+          "souple": {
+            "type": "regex",
+            "fichier": "evaluation.php",
+            "motif": "\\b(echo|print)\\b",
+            "min": 2,
+            "label": "message reformulé accepté"
+          },
+          "fichier": "evaluation.php",
+          "motif": "d[ée]j[àa] [ée]valu[ée]"
+        }
+      ]
+    },
+    {
+      "id": "AV",
+      "colonne": "AV",
+      "etape": "Etape 2",
+      "question": "3",
+      "sousQuestion": "d",
+      "libelle": "INSERT evaluation (requête + exécution) + message",
+      "points": 2,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "INSERT INTO evaluation",
+          "pts": 6,
+          "fichier": "evaluation.php",
+          "motif": "insert\\s+into\\s+`?evaluation`?"
+        },
+        {
+          "type": "regex",
+          "label": "exécution",
+          "pts": 1,
+          "fichier": "evaluation.php",
+          "motif": "(mysqli_query|->\\s*query|->\\s*exec|->\\s*execute|mysql_query)",
+          "min": 3
+        },
+        {
+          "type": "regex",
+          "label": "message « Evaluation enregistrée »",
+          "pts": 1,
+          "souple": {
+            "type": "regex",
+            "fichier": "evaluation.php",
+            "motif": "\\b(echo|print)\\b",
+            "min": 3,
+            "label": "message reformulé accepté"
+          },
+          "fichier": "evaluation.php",
+          "motif": "[ée]valuation enregistr[ée]e"
+        }
+      ]
+    },
+    {
+      "id": "AW",
+      "colonne": "AW",
+      "etape": "Etape 2",
+      "question": "4",
+      "sousQuestion": "",
+      "libelle": "liste.php : SELECT + exécution + parcours + affichage",
+      "points": 2.5,
+      "regles": [
+        {
+          "type": "regex",
+          "label": "SELECT des bijoux originaux (jointure evaluation)",
+          "pts": 6,
+          "fichier": "liste.php",
+          "motifs": [
+            "select[\\s\\S]{0,300}?from",
+            "evaluation",
+            "originalit"
+          ]
+        },
+        {
+          "type": "regex",
+          "label": "exécution",
+          "pts": 1,
+          "fichier": "liste.php",
+          "motif": "(mysqli_query|->\\s*query|->\\s*exec|->\\s*execute|mysql_query)"
+        },
+        {
+          "type": "regex",
+          "label": "parcours des enregistrements",
+          "pts": 1,
+          "fichier": "liste.php",
+          "motif": "while\\s*\\(.*fetch|foreach\\s*\\("
+        },
+        {
+          "type": "regex",
+          "label": "affichage des champs",
+          "pts": 2,
+          "fichier": "liste.php",
+          "motif": "echo|print"
+        }
+      ]
+    }
+  ]
+}

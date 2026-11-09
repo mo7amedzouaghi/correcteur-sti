@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+  <title>Correcteur STI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside id="barre">
+    <div class="marque">
+      <img class="logo" src="icon.png" alt="">
+      <div><div id="nomApp" class="nom-app">Correcteur</div><div id="modeApp" class="mode-app"></div></div>
+    </div>
+    <nav id="menu">
+      <button data-vue="projet" class="actif"><span>1</span>Projet</button>
+      <button data-vue="enonce"><span>2</span>Énoncé</button>
+      <button data-vue="grille"><span>3</span>Grille de correction</button>
+      <button data-vue="ressources"><span>4</span>Ressources</button>
+      <button data-vue="eleves"><span>5</span>Travaux des élèves</button>
+      <button data-vue="tolerance"><span>6</span>Tolérance</button>
+      <button data-vue="correction"><span>7</span>Correction &amp; grilles</button>
+      <button data-vue="ia" class="seulement-hybride"><span>⚙</span>Réglages IA</button>
+    </nav>
+    <div id="infoProjet" class="info-projet">Aucun projet ouvert</div>
+    <div class="auteur-app">© Mohamed Zouaghi</div>
+  </aside>
+
+  <main id="contenu">
+    <!-- 1. PROJET -->
+    <section class="vue actif" id="vue-projet">
+      <h1>Projet de correction</h1>
+      <p class="aide">Un projet regroupe l'énoncé, la grille, les ressources, les travaux des élèves et les grilles générées, dans un seul dossier.</p>
+      <div class="actions">
+        <button class="principal" id="btnNouveau">Nouveau projet</button>
+        <button id="btnOuvrir">Ouvrir un projet</button>
+        <button id="btnDernier" class="cache">Rouvrir le dernier</button>
+      </div>
+      <form id="formProjet" class="carte grille-form">
+        <label>Titre du devoir<input name="titre" required></label>
+        <label>Niveau
+          <select name="niveau"><option value="2STI">2e année</option><option value="3STI">3e année</option><option value="Bac">Bac (4e)</option></select></label>
+        <label>Type d'épreuve
+          <select name="type"><option value="pratique">Pratique</option><option value="theorique">Théorique</option></select></label>
+        <label>Établissement<input name="etablissement"></label>
+        <label>Section<input name="section"></label>
+        <label>Matière<input name="matiere"></label>
+        <label>Date<input name="date" placeholder="jj/mm/aaaa"></label>
+        <label>Enseignant(e) / évaluateur<input name="enseignant"></label>
+      </form>
+    </section>
+
+    <!-- 2. ÉNONCÉ -->
+    <section class="vue" id="vue-enonce">
+      <h1>Énoncé</h1>
+      <div class="depot" id="depotEnonce" data-cible="enonce">
+        <strong>Déposez l'énoncé ici</strong><span>PDF, Word (.docx) ou texte — ou cliquez pour parcourir</span>
+      </div>
+      <div id="enonceInfo" class="carte cache">
+        <div class="ligne-titre"><strong id="enonceNom"></strong><button id="btnOuvrirEnonce" class="petit">Ouvrir</button></div>
+        <pre id="enonceTexte" class="apercu"></pre>
+      </div>
+    </section>
+
+    <!-- 3. GRILLE -->
+    <section class="vue" id="vue-grille">
+      <h1>Grille de correction</h1>
+      <p class="aide">Téléversez la grille Excel officielle (une colonne par critère, ligne « Détail ») puis appliquez un modèle de règles, ou créez la grille critère par critère.</p>
+      <div class="actions">
+        <button class="principal" id="btnGrilleExcel">Téléverser une grille (Excel / JSON)</button>
+        <select id="selModele"><option value="">— Modèle de règles —</option></select>
+        <button id="btnAppliquerModele">Appliquer le modèle</button>
+        <button id="btnModeleFichier">Modèle depuis un fichier…</button>
+        <button id="btnAjoutCritere">+ Critère</button>
+        <button id="btnExportModele">Enregistrer comme modèle</button>
+      </div>
+      <div class="depot mince" id="depotGrille" data-cible="grille"><span>… ou déposez la grille Excel ici</span></div>
+      <div class="bandeau" id="grilleBilan"></div>
+      <div class="carte tableau-defile">
+        <table id="tabGrille">
+          <thead><tr><th>Col.</th><th>Étape</th><th>Q</th><th>Sous-q.</th><th>Critère</th><th>Barème</th><th>Règles auto</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4. RESSOURCES -->
+    <section class="vue" id="vue-ressources">
+      <h1>Ressources</h1>
+      <p class="aide">Corrigé, barème détaillé, fichiers fournis aux élèves, guide STI… Ils servent de référence (et de contexte à l'IA en mode hybride).</p>
+      <div class="actions">
+        <select id="catRessource">
+          <option value="corrige">Corrigé / barème détaillé</option>
+          <option value="guide">Guide STI</option>
+          <option value="ressource">Ressource fournie aux élèves</option>
+          <option value="autre">Autre</option>
+        </select>
+        <button class="principal" id="btnRessource">Ajouter des fichiers</button>
+      </div>
+      <div class="depot mince" id="depotRessource" data-cible="ressource"><span>Déposez les ressources ici</span></div>
+      <div class="carte">
+        <h3>Guide STI publié sur GitHub</h3>
+        <div class="ligne"><input id="urlGuide" placeholder="https://github.com/compte/depot ou lien d'un fichier / d'une page GitHub Pages"><button id="btnGuide">Importer le guide</button></div>
+      </div>
+      <div class="carte"><table id="tabRessources"><thead><tr><th>Ressource</th><th>Catégorie</th><th>Texte extrait</th><th></th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <!-- 5. ÉLÈVES -->
+    <section class="vue" id="vue-eleves">
+      <h1>Travaux des élèves</h1>
+      <p class="aide">Un dossier ou une archive .zip par élève (ex. <code>SW123456</code>) — ou un PDF / une image par élève pour une copie théorique scannée. Cochez « Difficulté » pour les élèves ayant des difficultés d'apprentissage.</p>
+      <div class="actions">
+        <button class="principal" id="btnEleves">Importer des dossiers</button>
+        <button id="btnElevesFichiers">Importer des archives / copies</button>
+        <button id="btnListe">Importer la liste (CSV)</button>
+      </div>
+      <div class="depot mince" id="depotEleves" data-cible="eleves"><span>Déposez ici le dossier de la classe, des dossiers ou des .zip</span></div>
+      <div class="carte tableau-defile">
+        <table id="tabEleves">
+          <thead><tr><th>N° candidat</th><th>Nom</th><th>Prénom</th><th>Fichiers</th><th title="Élève ayant des difficultés d'apprentissage">Difficulté</th><th>Note</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 6. TOLÉRANCE -->
+    <section class="vue" id="vue-tolerance">
+      <h1>Tolérance</h1>
+      <form id="formTol">
+        <div class="carte">
+          <h3>Tous les élèves (barème officiel)</h3>
+          <label class="inline">Pénalité par erreur <input type="number" step="0.25" min="0" name="penaliteParErreur" class="court"> point</label>
+          <label class="case"><input type="checkbox" name="penaliteParType"> Une seule sanction par <strong>type</strong> d'erreur sur toute la copie (A6)</label>
+          <label class="case"><input type="checkbox" name="penaliteUnique"> Une même erreur répétée n'est sanctionnée qu'une seule fois (A2)</label>
+          <label class="case"><input type="checkbox" name="casseToleree"> Majuscules / minuscules tolérées partout : HTML, CSS, JS, PHP, noms de variables (A5)</label>
+          <label class="case"><input type="checkbox" name="variantesSouples"> Message affiché reformulé accepté ; mise en page par margin / margin-left acceptée (A7, A11)</label>
+          <label class="case"><input type="checkbox" name="solutionsEquivalentes"> Accepter les solutions équivalentes (float / flex / margin, id / class, sélecteurs combinés « div h1 », mysqli / PDO…)</label>
+          <label class="case"><input type="checkbox" name="nonOfficielZero"> Ne pas évaluer ce qui n'est pas conforme aux documents officiels</label>
+          <label class="inline">Arrondi des notes par critère <select name="arrondi"><option value="0.25">0,25</option><option value="0.5">0,5</option><option value="0.01">0,01</option></select></label>
+        </div>
+        <div class="carte">
+          <h3>Élèves cochés « difficulté d'apprentissage »</h3>
+          <label class="case"><input type="checkbox" name="d_ignorerErreursMineures"> Ignorer les erreurs mineures (casse, frappe, « ; » ou guillemet oublié)</label>
+          <label class="inline">Plafond des pénalités sur la copie <input type="number" step="0.25" min="0" name="d_plafondPenalites" class="court"> point (B3)</label>
+          <label class="case"><input type="checkbox" name="d_pointsPartielsElargis"> Points partiels élargis (une tentative pertinente vaut jusqu'à la moitié des points)</label>
+          <label class="case"><input type="checkbox" name="d_commentairesSimplifies"> Commentaires simplifiés et encourageants, conseils de remédiation</label>
+          <label class="case"><input type="checkbox" name="d_mentionGrille"> Mentionner « correction adaptée » sur les grilles individuelle et collective</label>
+        </div>
+      </form>
+    </section>
+
+    <!-- 7. CORRECTION -->
+    <section class="vue" id="vue-correction">
+      <h1>Correction &amp; grilles</h1>
+      <div class="actions">
+        <button class="principal" id="btnLancer">▶ Lancer la correction</button>
+        <label class="case"><input type="checkbox" id="seulementNonCorriges" checked> seulement les non corrigés</label>
+        <button id="btnAnnuler" class="cache">Arrêter</button>
+        <span class="separateur"></span>
+        <button id="btnWord">Grilles détaillées (Word)</button>
+        <button id="btnExcel">Grille collective (Excel)</button>
+        <button id="btnSorties">Ouvrir le dossier des sorties</button>
+      </div>
+      <div id="progres" class="progres cache"><div class="barre"><div id="progresBarre"></div></div><span id="progresTexte"></span></div>
+      <div class="bandeau" id="bilanCorrection"></div>
+      <div class="deux-colonnes">
+        <div class="carte tableau-defile liste-resultats">
+          <table id="tabResultats"><thead><tr><th>N°</th><th>Élève</th><th>Total</th><th>Note</th><th>✓</th></tr></thead><tbody></tbody></table>
+          <div id="stats" class="stats"></div>
+        </div>
+        <div class="carte" id="detail"><p class="aide">Sélectionnez un élève pour voir et ajuster sa correction.</p></div>
+      </div>
+    </section>
+
+    <!-- RÉGLAGES IA -->
+    <section class="vue" id="vue-ia">
+      <h1>Réglages IA (hybrideCorrecteur)</h1>
+      <div class="carte">
+        <p>La correction hybride combine les règles automatiques et le modèle Claude (<code>claude-opus-5-5</code>), qui vérifie chaque critère dans le code ou la copie de l'élève. Toutes les notes restent modifiables avant l'export.</p>
+        <label>Clé API Anthropic<input type="password" id="cleApi" placeholder="sk-ant-…"></label>
+        <div class="actions"><button class="principal" id="btnCle">Enregistrer la clé</button><span id="etatCle"></span></div>
+        <p class="aide">La clé est chiffrée avec le coffre Windows et stockée uniquement sur cet ordinateur. Les travaux des élèves sont envoyés à l'API Claude au moment de la correction.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal cache"><div class="modal-boite">
+    <h3 id="modalTitre"></h3><p class="aide" id="modalAide"></p>
+    <textarea id="modalTexte" spellcheck="false"></textarea>
+    <div class="actions"><button class="principal" id="modalOk">Valider</button><button id="modalAnnuler">Annuler</button></div>
+  </div></div>
+  <div id="toast" class="toast cache"></div>
+  <script src="app.js"></script>
+</body>
+</html>

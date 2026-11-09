@@ -1,0 +1,43 @@
+{
+  "appId": "tn.sti.correcteurAuto",
+  "productName": "correcteurAuto",
+  "extraMetadata": {
+    "correcteurMode": "auto"
+  },
+  "directories": {
+    "output": "dist/correcteurAuto"
+  },
+  "files": [
+    "src/**/*",
+    "modeles/*.json",
+    "package.json",
+    "node_modules/**/*",
+    "!tests",
+    "!modeles/src",
+    "!dist"
+  ],
+  "asar": true,
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "signAndEditExecutable": true,
+    "signExecutable": false
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "correcteurAuto",
+    "artifactName": "correcteurAuto-Setup-${version}.exe"
+  },
+  "icon": "build/icon.png",
+  "copyright": "© 2026 Mohamed Zouaghi"
+}

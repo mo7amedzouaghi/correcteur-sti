@@ -1,0 +1,7 @@
+node_modules/
+dist/
+# documents officiels et travaux d'élèves : jamais dans le dépôt
+tests/fixtures/*.pdf
+tests/fixtures/*.xlsx
+tests/fixtures/eleves/
+*.log
