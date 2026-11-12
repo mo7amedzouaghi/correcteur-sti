@@ -143,7 +143,9 @@ gerer('grille:verifier', projet => verifierGrille(projet.grille));
 gerer('grille:proposer', async (dossier, projet) => {
   if (!projet.enonce?.texte?.trim()) throw new Error('Déposez d\'abord l\'énoncé (PDF ou Word contenant du texte).');
   const avecExcel = !!(projet.grille.gabaritExcel && projet.grille.criteres.length);
-  const total = avecExcel ? projet.grille.total : (projet.niveau === 'Bac' && projet.type === 'pratique' ? 40 : 20);
+  // Grille toujours redistribuée sur 40 points au départ, quel que soit le niveau/type du devoir ;
+  // la « Note » (noteSur, /20 par défaut) n'est qu'un affichage dérivé, réglable par l'enseignant.
+  const total = avecExcel ? projet.grille.total : 40;
   const noteSur = projet.grille.noteSur || 20;
   const { proposerGrille } = require('../core/proposition');
   const grille = proposerGrille(projet.enonce.texte, { total, noteSur, grilleExistante: avecExcel ? projet.grille : null });

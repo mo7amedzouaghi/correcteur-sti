@@ -10,6 +10,8 @@ const TOLERANCE_DEFAUT = {
   casseToleree: true,          // A5 : majuscules/minuscules tolérées (HTML, CSS, JS, PHP)
   variantesSouples: true,      // A7 / A11 : message reformulé accepté, mise en page par margin acceptée
   solutionsEquivalentes: true,
+  nomsApproches: true,         // fichiers, fonctions, id/class renommés ou mal orthographiés recherchés et acceptés
+  arrondiSuperieur: true,      // tolérance maximale : chaque critère arrondi au 0,25 supérieur, jamais au défavorable
   nonOfficielZero: true,
   arrondi: 0.25,
   difficulte: {
@@ -98,7 +100,9 @@ async function corrigerEleve(projet, dossierProjet, eleve, opts = {}) {
     partielsElargis: !!(eleve.difficulte && tol.difficulte.pointsPartielsElargis),
     pas: tol.arrondi || 0.25,
     casse: tol.casseToleree !== false,
-    souple: tol.variantesSouples !== false
+    souple: tol.variantesSouples !== false,
+    tolerantNomsFichiers: tol.nomsApproches !== false,
+    arrondiSuperieur: tol.arrondiSuperieur !== false
   };
   const simplifie = !!(eleve.difficulte && tol.difficulte.commentairesSimplifies);
 

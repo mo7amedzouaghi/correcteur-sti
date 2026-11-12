@@ -19,6 +19,22 @@
 const vm = require('vm');
 const cheerio = require('cheerio');
 
+// ---------- tolérance : rapprochement de noms (fichiers, fonctions, id/class renommés ou mal orthographiés) ----------
+function normNom(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+function distance(a, b) {
+  a = normNom(a); b = normNom(b);
+  const d = [];
+  for (let i = 0; i <= a.length; i++) d.push([i, ...Array(b.length).fill(0)]);
+  for (let j = 0; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+    d[i][j] = a[i - 1] === b[j - 1] ? d[i - 1][j - 1] : 1 + Math.min(d[i - 1][j - 1], d[i - 1][j], d[i][j - 1]);
+  }
+  return d[a.length][b.length];
+}
+// seuil de tolérance proportionnel à la longueur : fautes de frappe / noms renommés acceptés, pas les noms sans rapport
+function seuilProche(a, b) { return Math.max(1, Math.ceil(Math.max(a.length, b.length) / 4)); }
+function proche(a, b) { a = normNom(a); b = normNom(b); const d = distance(a, b); return d > 0 && d <= seuilProche(a, b); }
+
 // ---------- utilitaires fichiers ----------
 function globVersRegex(g) {
   const e = g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.');
@@ -28,10 +44,30 @@ function fichiersCorrespondants(ctx, motifFichier) {
   if (!motifFichier) return ctx.fichiers;
   const motifs = Array.isArray(motifFichier) ? motifFichier : [motifFichier];
   const rx = motifs.map(globVersRegex);
-  return ctx.fichiers.filter(f => {
+  const trouves = ctx.fichiers.filter(f => {
     const nom = f.rel.split('/').pop();
     return rx.some(r => r.test(nom) || r.test(f.rel));
   });
+  if (trouves.length || ctx.tolerantNomsFichiers === false) return trouves;
+  // Tolérance : fichier renommé (faute de frappe, nom approché) — uniquement pour un nom précis (sans * ni ?).
+  const ajouts = [];
+  for (const motif of motifs) {
+    if (/[*?]/.test(motif) || !motif.includes('.')) continue;
+    const ext = motif.split('.').pop().toLowerCase();
+    const cible = motif.replace(/\.[^.]+$/, '');
+    const parExt = ctx.fichiers.filter(f => (f.rel.split('.').pop() || '').toLowerCase() === ext);
+    let meilleur = null, meilleureDist = Infinity;
+    for (const f of parExt) {
+      const base = f.rel.split('/').pop().replace(/\.[^.]+$/, '');
+      const d = distance(base, cible);
+      if (d <= seuilProche(base, cible) && d < meilleureDist) { meilleur = f; meilleureDist = d; }
+    }
+    // à défaut de nom proche, un seul fichier de cette extension dans la copie ne peut être que celui-là
+    // (fichier renommé sans rapport : code.js, decor.css…) — jamais pour .html (plusieurs pages attendues).
+    if (!meilleur && ext !== 'html' && ext !== 'htm' && parExt.length === 1) meilleur = parExt[0];
+    if (meilleur && !ajouts.includes(meilleur)) ajouts.push(meilleur);
+  }
+  return ajouts.length ? ajouts : trouves;
 }
 function sansCommentaires(code, ext) {
   let s = code.replace(/\/\*[\s\S]*?\*\//g, ' ');
@@ -71,12 +107,52 @@ function parserCss(texte) {
   }
   return regles;
 }
+function tokensSelecteur(sel) { return (sel.match(/[.#][\w-]+/g) || []).map(t => t.slice(1)); }
 function selecteurCorrespond(sel, cible) {
+  // cible id/classe explicite (#defi, .bouton) => cherchée parmi les id/classes du sélecteur, sans les confondre
+  const m = /^([.#])([\w-]+)$/.exec(cible);
+  if (m) return tokensSelecteur(sel).includes(m[2]) && sel.includes(m[1] === '#' ? '#' + m[2] : '.' + m[2]);
   // cible simple (h1, header, fieldset…) => cherchée comme mot dans le sélecteur
   if (/^[a-z][a-z0-9-]*$/i.test(cible)) {
     return new RegExp('(^|[\\s>+~])' + cible + '(?=$|[.#:\\[\\s>+~])', 'i').test(sel);
   }
   return new RegExp(cible, 'i').test(sel);
+}
+// id/class renommé ou mal orthographié par l'élève (ex. #defis pour #defi, .boutton pour .bouton)
+function selecteurCorrespondTolerant(sel, cible) {
+  if (selecteurCorrespond(sel, cible)) return true;
+  const m = /^([.#])([\w-]+)$/.exec(cible) || (/^[a-z][\w-]*$/i.test(cible) && [null, null, cible]);
+  if (!m) return false;
+  return tokensSelecteur(sel).some(t => proche(t, m[2]));
+}
+// sélecteur CSS #id/.classe introuvable tel quel : on cherche l'id/la classe la plus proche réellement utilisée
+function selecteurIdClasseApprox($, selecteur) {
+  const m = /^([.#])([\w-]+)(.*)$/.exec(selecteur.trim());
+  if (!m) return null;
+  const [, type, nom, reste] = m;
+  const attr = type === '#' ? 'id' : 'class';
+  let meilleur = null, meilleureDist = Infinity;
+  $('[' + attr + ']').each((_, el) => {
+    const vals = type === '#' ? [$(el).attr('id')] : ($(el).attr('class') || '').split(/\s+/);
+    for (const v of vals) {
+      if (!v || !proche(v, nom)) continue;
+      const d = distance(v, nom);
+      if (d < meilleureDist) { meilleur = v; meilleureDist = d; }
+    }
+  });
+  return meilleur ? type + meilleur.replace(/([.#:\[\]])/g, '\\$1') + reste : null;
+}
+// champ de formulaire introuvable par id/name : on le retrouve par le libellé de sa ligne/son conteneur
+function champParLibelle($, libelleRx, tagCible) {
+  let trouve = $();
+  $('tr, li, div, p, label, dt, dd').each((_, el) => {
+    const texte = $(el).clone().find('input,select,textarea,button').remove().end().text();
+    if (libelleRx.test(texte)) {
+      const champ = $(el).find(tagCible || 'input,select,textarea').first();
+      if (champ.length && !trouve.toArray().includes(champ.get(0))) trouve = trouve.add(champ);
+    }
+  });
+  return trouve;
 }
 
 // ---------- JS : extraire le corps d'une fonction ----------
@@ -112,6 +188,25 @@ function avecFonctionsAppelees(code, corps, vus, profondeur) {
 function erreurSyntaxeJs(code) {
   try { new vm.Script(code); return null; } catch (e) { return e.message; }
 }
+// fonction renommée ou mal orthographiée (ex. genereDefi pour genererDefi, afficheDate pour afficherDate)
+function nomsFonctionsDeclarees(code) {
+  const noms = new Set();
+  const rx = /function\s+([a-zA-Z_$][\w$]*)\s*\(|\b([a-zA-Z_$][\w$]*)\s*=\s*(?:async\s*)?function\s*\(|\b([a-zA-Z_$][\w$]*)\s*=\s*\([^()]*\)\s*=>/g;
+  let m;
+  while ((m = rx.exec(code))) { const n = m[1] || m[2] || m[3]; if (n) noms.add(n); }
+  return [...noms];
+}
+function corpsFonctionTolerant(code, nom, tolerant) {
+  let corps = corpsFonction(code, nom);
+  if (corps != null || tolerant === false) return { corps, nomTrouve: corps != null ? nom : null };
+  let meilleur = null, meilleureDist = Infinity;
+  for (const c of nomsFonctionsDeclarees(code)) {
+    if (!proche(c, nom)) continue;
+    const d = distance(c, nom);
+    if (d < meilleureDist) { meilleur = c; meilleureDist = d; }
+  }
+  return meilleur ? { corps: corpsFonction(code, meilleur), nomTrouve: meilleur } : { corps: null, nomTrouve: null };
+}
 
 // ---------- évaluation d'une règle ----------
 function evaluerRegle(r, ctx) {
@@ -143,23 +238,35 @@ function evaluerRegle(r, ctx) {
       case 'html': {
         const fs = fichiersCorrespondants(ctx, r.fichier);
         if (!fs.length) return { ok: false, info: 'fichier absent : ' + r.fichier };
-        let trouve = 0;
+        let trouve = 0, approx = false;
         for (const f of fs) {
           // A5 : casse tolérée => document et sélecteur comparés en minuscules
           const src = contenu(f, true);
           const $ = cheerio.load(ctx.casse ? src.toLowerCase() : src);
-          let els = $(ctx.casse ? r.selecteur.toLowerCase() : r.selecteur).toArray();
+          let sel = ctx.casse ? r.selecteur.toLowerCase() : r.selecteur;
+          let els = $(sel).toArray();
+          // id/classe renommé ou mal orthographié (ex. #defis, .boutton) : on cherche le plus proche utilisé
+          if (!els.length && ctx.tolerantNomsFichiers !== false && /^[.#]/.test(sel.trim())) {
+            const sel2 = selecteurIdClasseApprox($, sel);
+            if (sel2) { els = $(sel2).toArray(); approx = els.length > 0; }
+          }
           if (r.texte) { const rx = mkRegex(r.texte, r.flags, ctx); els = els.filter(e => { rx.lastIndex = 0; return rx.test($(e).text()); }); }
           if (r.motif) { const rx = mkRegex(r.motif, r.flags, ctx); els = els.filter(e => { rx.lastIndex = 0; return rx.test($.html(e)); }); }
           if (r.cibleIframe) {
             const noms = new Set($('iframe[name]').toArray().map(e => ($(e).attr('name') || '').toLowerCase()));
             els = els.filter(e => noms.has(($(e).attr('target') || '').toLowerCase()));
           }
+          // champ de formulaire non trouvé par id/name : on le cherche par le libellé de sa ligne (ex. « Nom du pilote »)
+          if (!els.length && r.libelle && ctx.tolerantNomsFichiers !== false) {
+            const trouves = champParLibelle($, mkRegex(r.libelle, 'i', ctx), r.tagCible);
+            els = trouves.toArray(); approx = els.length > 0;
+          }
           trouve = Math.max(trouve, els.length);
         }
         const min = r.min || 1;
-        if (r.proportionnel) return { ok: trouve >= min, fraction: Math.min(trouve / min, 1), info: `${trouve}/${min} élément(s) « ${r.selecteur} »` };
-        return { ok: trouve >= min, info: `${trouve} élément(s) « ${r.selecteur} »` };
+        const suffixe = approx ? ' (identifiant/libellé approché accepté)' : '';
+        if (r.proportionnel) return { ok: trouve >= min, fraction: Math.min(trouve / min, 1), info: `${trouve}/${min} élément(s) « ${r.selecteur} »${suffixe}` };
+        return { ok: trouve >= min, info: `${trouve} élément(s) « ${r.selecteur} »${suffixe}` };
       }
       case 'css': {
         const fs = fichiersCorrespondants(ctx, r.fichier || '*.css');
@@ -171,7 +278,7 @@ function evaluerRegle(r, ctx) {
         if (!r.selecteurs || !r.selecteurs.length) {
           return { ok: candidates.length > 0, info: candidates.length ? 'déclaré dans : ' + candidates.map(c => c.selecteurs.join(',')).join(' | ') : 'déclaration absente' };
         }
-        const manquants = r.selecteurs.filter(c => !candidates.some(rg => rg.selecteurs.some(s => selecteurCorrespond(s, c))));
+        const manquants = r.selecteurs.filter(c => !candidates.some(rg => rg.selecteurs.some(s => selecteurCorrespondTolerant(s, c))));
         return { ok: manquants.length === 0, fraction: (r.selecteurs.length - manquants.length) / r.selecteurs.length,
           info: manquants.length ? 'non appliqué à : ' + manquants.join(', ') : 'appliqué à : ' + r.selecteurs.join(', ') };
       }
@@ -180,15 +287,35 @@ function evaluerRegle(r, ctx) {
         if (!fs.length) return { ok: false, info: 'fichier JS absent' };
         const tout = fs.map(f => contenu(f, true)).join('\n');
         for (const f of fs) {
-          let corps = corpsFonction(contenu(f, true), r.fonction);
-          if (corps == null) continue;
+          const { corps: corpsBrut, nomTrouve } = corpsFonctionTolerant(contenu(f, true), r.fonction, ctx.tolerantNomsFichiers);
+          if (corpsBrut == null) continue;
+          let corps = corpsBrut;
+          const suffixe = nomTrouve !== r.fonction ? ` (sous le nom ${nomTrouve})` : '';
           // solutions équivalentes : le contrôle peut être délégué à des fonctions auxiliaires (lettres(), verif()…)
-          if (r.suivreAppels !== false) corps = avecFonctionsAppelees(tout, corps, new Set([r.fonction]), 3);
-          if (!r.motif) return { ok: true, info: `fonction ${r.fonction} trouvée` };
+          if (r.suivreAppels !== false) corps = avecFonctionsAppelees(tout, corps, new Set([nomTrouve]), 3);
+          if (!r.motif) return { ok: true, info: `fonction ${r.fonction} trouvée${suffixe}` };
           const n = compter(mkRegex(r.motif, r.flags, ctx), corps);
-          return { ok: n >= (r.min || 1), info: n ? `motif trouvé dans ${r.fonction}` : `motif absent de ${r.fonction}` };
+          return { ok: n >= (r.min || 1), info: n ? `motif trouvé dans ${r.fonction}${suffixe}` : `motif absent de ${r.fonction}${suffixe}` };
         }
         return { ok: false, info: `fonction ${r.fonction} absente` };
+      }
+      case 'variable': {
+        // variable globale { fichier, nom } : déclaration explicite, affectation implicite (sans let/var/const,
+        // y compris dans une fonction) ou valeur conservée/retrouvée autrement via le DOM — tolérance maximale :
+        // ce qui compte est que le rôle (mémoriser une valeur entre deux appels) soit assuré, pas la syntaxe exacte.
+        const fs = fichiersCorrespondants(ctx, r.fichier || '*.js');
+        if (!fs.length) return { ok: false, info: 'fichier JS absent' };
+        const nom = (r.nom || '').replace(/[^\w$]/g, '');
+        const decl = new RegExp('\\b(let|var|const)\\s+' + nom + '\\s*=', 'i');
+        const affect = new RegExp('(^|[^.\\w$])' + nom + '\\s*=(?!=)', 'i');
+        const dom = new RegExp('getElementById\\s*\\(\\s*["\']' + nom + '["\']\\s*\\)', 'i');
+        for (const f of fs) {
+          const c = contenu(f, true);
+          if (decl.test(c)) return { ok: true, info: `variable ${r.nom} déclarée` };
+          if (affect.test(c)) return { ok: true, info: `variable ${r.nom} affectée (globale implicite acceptée)` };
+          if (dom.test(c)) return { ok: true, info: `valeur de ${r.nom} conservée via le DOM (#${r.nom})` };
+        }
+        return { ok: false, info: `variable ${r.nom} introuvable (ni déclarée, ni affectée, ni conservée via le DOM)` };
       }
       case 'ou': {
         const res = r.regles.map(x => evaluerRegle(x, ctx));
@@ -211,6 +338,8 @@ function evaluerRegle(r, ctx) {
 }
 
 function arrondir(x, pas) { pas = pas || 0.25; return Math.round(x / pas + 1e-9) * pas; }
+// tolérance maximale : chaque critère est arrondi au quart de point SUPÉRIEUR (jamais défavorable à l'élève)
+function arrondirSuperieur(x, pas) { pas = pas || 0.25; return Math.ceil(x / pas - 1e-9) * pas; }
 
 /**
  * Évalue un critère. Retourne { points, max, details[], manuel, observations[] }.
@@ -247,7 +376,8 @@ function evaluerCritere(crit, ctx) {
     obtenu += pts * part;
     details.push({ label: r.label || r.type, ok: part >= 1, fraction: part, info: res.info });
   }
-  const pts = total ? arrondir((obtenu / total) * crit.points, ctx.pas) : 0;
+  const arr = ctx.arrondiSuperieur !== false ? arrondirSuperieur : arrondir;
+  const pts = total ? arr((obtenu / total) * crit.points, ctx.pas) : 0;
   return { points: Math.min(pts, crit.points), max: crit.points, details, manuel: false, observations: [] };
 }
 
@@ -277,4 +407,4 @@ function detecterErreurs(ctx) {
   return erreurs;
 }
 
-module.exports = { evaluerCritere, evaluerRegle, detecterErreurs, parserCss, corpsFonction, arrondir, fichiersCorrespondants };
+module.exports = { evaluerCritere, evaluerRegle, detecterErreurs, parserCss, corpsFonction, arrondir, arrondirSuperieur, fichiersCorrespondants, distance, proche };

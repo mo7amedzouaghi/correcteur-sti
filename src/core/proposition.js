@@ -142,6 +142,9 @@ function reglesDepuisTexte(f) {
     for (const f2 of fichiers.filter(x => /\.js$/i.test(x))) ajout({ type: 'html', fichier: cible, selecteur: `script[src*="${f2}" i]`, label: `liaison ${f2}` });
   }
   const fn = (t.match(/fonction\s+(?:javascript\s+)?"?([a-zA-Z_]\w*)"?/i) || [])[1];
+  // variable globale (ex. « Déclarer une variable globale code ») : tolérance maximale — déclarée, affectée
+  // implicitement ou valeur retrouvée autrement (DOM) sont toutes acceptées, voir regles.js type « variable ».
+  for (const m of t.matchAll(/variable\s+globale\s+"?([a-zA-Z_]\w*)"?/gi)) ajout({ type: 'variable', fichier: js, nom: m[1], label: `variable globale ${m[1]}` });
   if (estHtml && /clic sur le bouton|formulaire/i.test(t) && php) {
     ajout({ type: 'html', fichier: cible, selecteur: `form[action*="${php}"]`, label: `action ${php}` });
     ajout({ type: 'html', fichier: cible, selecteur: 'form[method="post" i]', label: 'méthode post' });
