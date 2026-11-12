@@ -32,7 +32,13 @@ const CSS_MOTS = [
   [/taille (de la )?police|font-size/i, 'font-size', 'taille de police'],
   [/m[êe]me ligne|à droite|à gauche|flottant/i, 'float|display|margin(-left|-right)?', 'disposition'],
   [/arrondi|radius/i, 'border-radius', 'coins arrondis'],
-  [/cach|masqu|visib/i, 'display|visibility', 'visibilité']
+  [/cach|masqu|visib/i, 'display|visibility', 'visibilité'],
+  // annexe 2026
+  [/arr[êe]t\w* (le )?flott|sous les (blocs|[ée]l[ée]ments) flottants/i, 'clear', 'arrêt du flottement'],
+  [/flex/i, 'display', 'display: flex'],
+  [/coll[ée]|sticky/i, 'position', 'position collante'],
+  [/position de l.image|image (de fond )?centr/i, 'background-position', 'position de l\'image de fond'],
+  [/d[ée]bord|d[ée]filement|overflow/i, 'overflow', 'débordement']
 ];
 
 const nettoyer = s => s.replace(/[“”«»"]/g, '"').replace(/[’]/g, "'").replace(/\s+/g, ' ').trim();

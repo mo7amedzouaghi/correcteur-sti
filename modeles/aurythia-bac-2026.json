@@ -586,7 +586,7 @@
               "type": "css",
               "fichier": "mesStyles.css",
               "propriete": "display",
-              "valeur": "flex|grid",
+              "valeur": "flex",
               "selecteurs": [
                 "main"
               ]
@@ -642,7 +642,7 @@
               "type": "css",
               "fichier": "mesStyles.css",
               "propriete": "display",
-              "valeur": "flex|grid",
+              "valeur": "flex",
               "selecteurs": [
                 "main"
               ]
@@ -691,7 +691,7 @@
               "type": "css",
               "fichier": "mesStyles.css",
               "propriete": "display",
-              "valeur": "flex|grid",
+              "valeur": "flex",
               "selecteurs": [
                 "main"
               ]
@@ -735,7 +735,7 @@
               "type": "css",
               "fichier": "mesStyles.css",
               "propriete": "display",
-              "valeur": "flex|grid",
+              "valeur": "flex",
               "selecteurs": [
                 "main"
               ]
