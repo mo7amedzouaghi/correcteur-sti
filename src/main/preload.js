@@ -2,7 +2,7 @@
 const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 const canaux = [
-  'app:info', 'config:dernierProjet',
+  'app:info', 'config:dernierProjet', 'maj:config', 'maj:verifier', 'maj:installer', 'maj:page',
   'projet:nouveau', 'projet:ouvrir', 'projet:sauver',
   'enonce:deposer',
   'grille:modeles', 'grille:importer', 'grille:proposer', 'grille:appliquerModele', 'grille:exporterModele', 'grille:verifier',
@@ -21,5 +21,6 @@ contextBridge.exposeInMainWorld('sti', {
     return api[canal](...args);
   },
   cheminFichier: f => webUtils.getPathForFile(f),
-  surProgres: cb => ipcRenderer.on('correction:progres', (_e, d) => cb(d))
+  surProgres: cb => ipcRenderer.on('correction:progres', (_e, d) => cb(d)),
+  surMajProgres: cb => ipcRenderer.on('maj:progres', (_e, d) => cb(d))
 });

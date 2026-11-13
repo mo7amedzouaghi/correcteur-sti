@@ -1,6 +1,6 @@
 'use strict';
 // Orchestration de la correction d'un élève : règles automatiques -> résultat notable/éditable.
-const { evaluerCritere, detecterErreurs, arrondir, fichiersCorrespondants } = require('./regles');
+const { evaluerCritere, detecterErreurs, fichiersAttendus, racineCommune, arrondir, fichiersCorrespondants } = require('./regles');
 const { lireTravail } = require('./eleves');
 
 const TOLERANCE_DEFAUT = {
@@ -10,7 +10,7 @@ const TOLERANCE_DEFAUT = {
   casseToleree: true,          // A5 : majuscules/minuscules tolérées (HTML, CSS, JS, PHP)
   variantesSouples: true,      // A7 / A11 : message reformulé accepté, mise en page par margin acceptée
   solutionsEquivalentes: true,
-  nonOfficielZero: true,
+  fichierHorsDossier: true,    // A10 : fichier rangé dans un sous-dossier = −0,25, une seule fois
   arrondi: 0.25,
   difficulte: {
     ignorerErreursMineures: true,
@@ -118,7 +118,11 @@ async function corrigerEleve(projet, dossierProjet, eleve, opts = {}) {
   if (!travail.fichiers.length) res.avertissements.push('Aucun fichier trouvé pour cet élève.');
 
   // pénalités automatiques (erreurs de syntaxe), sauf élève en difficulté avec tolérance des erreurs mineures
-  const erreurs = detecterErreurs(ctx);
+  const erreurs = detecterErreurs(ctx, {
+    attendus: fichiersAttendus(grille.criteres),
+    racine: racineCommune(travail.fichiers),
+    fichierHorsDossier: tol.fichierHorsDossier
+  });
   if (mode === 'auto' && tol.penaliteParErreur > 0 && !ctx.tolerant) {
     const dejaVu = new Set();
     // B3 : plafond des pénalités pour un élève en difficulté

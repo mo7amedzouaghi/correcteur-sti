@@ -49,5 +49,15 @@ const { exporterExcel } = require('../src/core/export-excel');
   const r3 = projet.resultats.SW100003;
   assert.strictEqual(r3.erreurs.filter(e => e.penalite > 0).length, 1, 'A6 : une seule sanction pour le type « unité CSS manquante »');
   assert.strictEqual(r3.total, 39.75, 'A5 casse, A7 messages, A11 margin acceptés ; A6 −0,25 une fois');
+  const r4 = projet.resultats.SW100004;
+  assert.strictEqual(r4.total, 40, 'A11 : sélecteurs combinés (header h1) et margin / margin-left acceptés sans pénalité');
+  const r5 = projet.resultats.SW100005;
+  assert.strictEqual(r5.erreurs.filter(e => e.penalite > 0 && /hors du dossier/.test(e.description)).length, 1, 'A10 : une sanction pour fichier hors du dossier de travail');
+  assert.strictEqual(r5.total, 39.75, 'A10 : −0,25 une seule fois');
+  // B4 : élève en difficulté, liens présents mais sans cible iframe => moitié des points du critère, pas zéro
+  const r2 = projet.resultats.SW100002;
+  assert(r2.criteres.I.points > 0.5, 'B4 : points partiels pour les liens sans cible iframe (élève en difficulté)');
+  // la grille collective contient bien les 5 élèves
+  assert.deepStrictEqual(x.horsGabarit, [], 'tous les élèves tiennent dans le gabarit Excel');
   console.log('\nSorties :', fs.readdirSync(path.join(dossier, 'sorties')), '\nDossier :', dossier, x.horsGabarit);
 })().catch(e => { console.error(e); process.exit(1); });

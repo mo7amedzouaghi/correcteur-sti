@@ -31,13 +31,18 @@ Installateur dans la page [**Releases**](https://github.com/mo7amedzouaghi/corre
 
 ## Grille proposée à partir de l'énoncé
 
+- **Toujours sur 40 points** (note sur 20 = total / 2), **répartie équitablement** en multiples de 0,25 : la somme est exacte
+  et aucun critère n'est à 0. Le total est réglable (champ « Sur … points »).
 - **Structure du devoir respectée** : les parties gardent leur nom et leur titre (« Exercice 2 : Contrôle de saisie »,
   « Partie B : Questions de cours », « Etape 1 : Manipulation de la base de données »…) ; sans parties, la grille est
   organisée par question. Numérotation 1), 2)… a), b)… reprise du sujet.
-- **Barème** : tableau de points imprimé dans l'énoncé, sinon points annoncés dans les titres (« Exercice 2 (8 points) »),
-  sinon répartition selon le nombre d'éléments à vérifier.
-- **Règles automatiques** selon la nature de la question : fichiers, balises et liens HTML, propriétés CSS,
-  fonctions JavaScript, requêtes SQL / PHP, messages affichés. Les questions de cours sont à noter par l'enseignant.
+- **Barème** : tableau de points imprimé dans l'énoncé, sinon points annoncés dans les titres (« Exercice 2 (8 points) »)
+  ramenés sur 40, sinon répartition selon le nombre d'éléments à vérifier. « 0,25 pt par question / par blanc » :
+  chaque question de la partie reçoit la même part ; ses sous-questions se la partagent.
+- **Épreuve théorique** (aucun fichier à créer) détectée automatiquement : QCM (les propositions a) b) c) ne sont pas
+  des sous-questions), questions, parties « Compléter les codes »… tous les critères sont notés par l'enseignant.
+- **Règles automatiques** (épreuve pratique) selon la nature de la question : fichiers, balises et liens HTML,
+  propriétés CSS, fonctions JavaScript, requêtes SQL / PHP, messages affichés. Les questions de cours sont à noter à la main.
 - Avec une grille Excel officielle, ses colonnes et son barème sont conservés ; libellés et règles sont proposés.
 
 La proposition est un point de départ : vérifiez libellés, barème et règles avant la correction.
@@ -45,18 +50,29 @@ La proposition est un point de départ : vérifiez libellés, barème et règles
 ## Règles de tolérance par défaut
 
 **Tous les élèves**
-- −0,25 par **type** d'erreur sur toute la copie ; une erreur répétée n'est sanctionnée qu'une fois.
-- Majuscules / minuscules **tolérées partout** (HTML, CSS, JS, PHP, noms de variables et de fichiers).
+- −0,25 par **type** d'erreur sur toute la copie ; une erreur répétée n'est sanctionnée qu'une fois. Pas de pénalité en cascade.
+- Majuscules / minuscules **tolérées partout** (HTML, CSS, JS, PHP, noms de variables, de fonctions et de fichiers).
 - Message affiché **reformulé accepté** s'il est au bon endroit.
-- Solutions équivalentes acceptées : `float` / `flex` / `inline-block` / `margin-left`, sélecteurs combinés (`div h1`),
-  `id` / `class`, `mysqli` / `PDO`, fonctions auxiliaires…
-- Code commenté non évalué ; ce qui n'est pas conforme aux documents officiels n'est pas évalué.
+- Solutions équivalentes acceptées : `float` / `flex` / `inline-block` / `margin` / `margin-left`, sélecteurs combinés (`div h1`),
+  `id` / `class`, `mysqli` / `PDO`, fonctions auxiliaires, expression régulière JavaScript…
+- Unité CSS oubliée (`padding: 15`) : une seule sanction pour ce type d'erreur.
+- Fichier demandé rangé dans un sous-dossier (hors du dossier de travail) : −0,25, une seule fois.
+- Erreur de syntaxe bloquante (accolade manquante) : sanctionnée une fois, la logique reste notée.
+- Code commenté non évalué ; code supplémentaire non pénalisé ; seul ce qui est conforme aux documents officiels rapporte des points.
 
 **Élèves en difficulté d'apprentissage**
-- Erreurs mineures ignorées (casse, frappe, `;` ou guillemet oublié).
-- Points partiels élargis (jusqu'à la moitié d'un critère pour une tentative pertinente).
-- Pénalités plafonnées à 1 point sur la copie.
+- Erreurs mineures ignorées (casse, frappe, `;` ou guillemet oublié, unité, rangement des fichiers).
+- Points partiels élargis (jusqu'à la moitié d'un critère pour une tentative pertinente, par ex. lien présent mais cible fausse).
+- Pénalités plafonnées à 1 point sur la copie si les erreurs mineures ne sont pas ignorées.
 - Commentaires simplifiés avec conseils de remédiation ; mention « correction adaptée » (désactivable).
+
+## Mise à jour
+
+Onglet **Mise à jour** : l'application compare sa version à la dernière version publiée sur GitHub
+(vérification automatique au démarrage, désactivable). **Télécharger et installer** récupère l'installateur,
+contrôle sa taille et son empreinte SHA-256, puis vous demande confirmation avant de le lancer.
+Vos projets et réglages ne sont pas modifiés. Publier une nouvelle version = créer une Release GitHub (`vX.Y.Z`)
+contenant `correcteurAuto-Setup-X.Y.Z.exe`.
 
 ## Modèles de règles
 
@@ -70,7 +86,7 @@ Toute grille peut être enregistrée comme nouveau modèle depuis l'application.
 ```bash
 npm install
 npm start           # lance correcteurAuto
-npm test            # test de bout en bout sur 3 élèves fictifs
+npm test            # correction (5 élèves fictifs), grille proposée sur 40, mise à jour
 npm run dist        # installateur Windows (dist/)
 ```
 

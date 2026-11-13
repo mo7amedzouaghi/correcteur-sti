@@ -330,21 +330,24 @@
           "label": "lien ajout.html + cible iframe",
           "fichier": "index.html",
           "selecteur": "a[href*=\"ajout.html\"]",
-          "cibleIframe": true
+          "cibleIframe": true,
+          "indice": "href\\s*=\\s*[\"']?ajout\\.html"
         },
         {
           "type": "html",
           "label": "lien evaluation.html + cible iframe",
           "fichier": "index.html",
           "selecteur": "a[href*=\"evaluation.html\"]",
-          "cibleIframe": true
+          "cibleIframe": true,
+          "indice": "href\\s*=\\s*[\"']?evaluation\\.html"
         },
         {
           "type": "html",
           "label": "lien liste.php + cible iframe",
           "fichier": "index.html",
           "selecteur": "a[href*=\"liste.php\"]",
-          "cibleIframe": true
+          "cibleIframe": true,
+          "indice": "href\\s*=\\s*[\"']?liste\\.php"
         }
       ]
     },

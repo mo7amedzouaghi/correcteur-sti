@@ -14,6 +14,7 @@ function nouveauProjet(infos = {}) {
     type: infos.type || 'pratique',         // pratique | theorique
     etablissement: '', section: 'Sciences de l\'informatique', matiere: 'S.T.I', date: '', enseignant: '',
     enonce: null,
+    totalGrille: 40,                        // total de la grille proposée automatiquement (note sur 20 = total / 2)
     grille: { titre: '', total: 40, noteSur: 20, criteres: [], remarques: [] },
     ressources: [],
     guideUrl: 'https://github.com/mo7amedzouaghi/guideSTI',

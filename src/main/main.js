@@ -12,6 +12,7 @@ const { lireJson, verifierGrille } = require('../core/grille');
 // correcteurAuto : correction par règles automatiques, hors ligne
 const pkg = require('../../package.json');
 const MODE = 'auto';
+const VERSION = process.env.STI_VERSION_TEST || pkg.version; // STI_VERSION_TEST : essais de l'écran « Mise à jour »
 const NOM_APP = 'correcteurAuto';
 app.setName(NOM_APP);
 
@@ -69,8 +70,38 @@ const gerer = (canal, fn) => ipcMain.handle(canal, async (_e, ...a) => {
 });
 
 // ---------- application / configuration ----------
-gerer('app:info', () => ({ mode: MODE, nom: NOM_APP, version: pkg.version }));
+gerer('app:info', () => ({ mode: MODE, nom: NOM_APP, version: VERSION }));
 gerer('config:dernierProjet', () => lireConfig().dernierProjet || null);
+
+// ---------- mise à jour (Releases GitHub) ----------
+const maj = require('../core/maj');
+gerer('maj:config', cfg => {
+  const c = lireConfig();
+  if (cfg && typeof cfg.majAuto === 'boolean') { c.majAuto = cfg.majAuto; ecrireConfig(c); }
+  return { majAuto: c.majAuto !== false, version: VERSION };
+});
+gerer('maj:verifier', async () => maj.verifier(VERSION));
+gerer('maj:installer', async () => {
+  // on re-vérifie côté application : le renderer ne fournit jamais l'adresse à télécharger
+  const info = await maj.verifier(VERSION);
+  if (!info.disponible) throw new Error('Aucune mise à jour disponible.');
+  const dossier = path.join(app.getPath('temp'), 'correcteurAuto-maj');
+  const r = await maj.telecharger(info.asset, dossier, (recu, total) => fenetre.webContents.send('maj:progres', { recu, total }));
+  const choix = await dialog.showMessageBox(fenetre, {
+    type: 'question', buttons: ['Installer maintenant', 'Plus tard'], defaultId: 0, cancelId: 1,
+    title: 'Mise à jour de correcteurAuto',
+    message: `correcteurAuto ${info.derniere} est prêt à être installé.`,
+    detail: 'L\'application va se fermer, puis l\'installateur démarre. Vos projets et vos réglages sont conservés.\n\n'
+      + (r.verifie ? 'Empreinte SHA-256 vérifiée.' : 'Taille vérifiée (empreinte non fournie par GitHub).')
+      + '\nL\'installateur n\'est pas signé : si Windows SmartScreen s\'affiche, cliquez sur « Informations complémentaires » puis « Exécuter quand même ».'
+  });
+  if (choix.response !== 0) return { lance: false, fichier: r.fichier, derniere: info.derniere };
+  const erreur = await shell.openPath(r.fichier);
+  if (erreur) throw new Error('Impossible de lancer l\'installateur : ' + erreur);
+  setTimeout(() => app.quit(), 700);
+  return { lance: true, derniere: info.derniere };
+});
+gerer('maj:page', async () => { await shell.openExternal(maj.PAGE_RELEASES); return true; });
 
 // ---------- projet ----------
 gerer('projet:nouveau', async infos => {
@@ -143,11 +174,17 @@ gerer('grille:verifier', projet => verifierGrille(projet.grille));
 gerer('grille:proposer', async (dossier, projet) => {
   if (!projet.enonce?.texte?.trim()) throw new Error('Déposez d\'abord l\'énoncé (PDF ou Word contenant du texte).');
   const avecExcel = !!(projet.grille.gabaritExcel && projet.grille.criteres.length);
-  const total = avecExcel ? projet.grille.total : (projet.niveau === 'Bac' && projet.type === 'pratique' ? 40 : 20);
+  // grille sur 40 points (note sur 20 = total / 2), répartie équitablement ; une grille Excel importée garde son barème
+  const total = avecExcel ? projet.grille.total : (Number(projet.totalGrille) > 0 ? Number(projet.totalGrille) : 40);
   const noteSur = projet.grille.noteSur || 20;
   const { proposerGrille } = require('../core/proposition');
-  const grille = proposerGrille(projet.enonce.texte, { total, noteSur, grilleExistante: avecExcel ? projet.grille : null });
-  const source = 'analyse automatique de l\'énoncé', avertissement = null;
+  const grille = proposerGrille(projet.enonce.texte, { total, noteSur, type: projet.type, grilleExistante: avecExcel ? projet.grille : null });
+  const source = 'analyse automatique de l\'énoncé';
+  let avertissement = null;
+  if (grille.theorique && projet.type !== 'theorique') {
+    projet.type = 'theorique';
+    avertissement = 'Épreuve détectée comme théorique : le type du projet est passé à « Théorique ».';
+  }
   if (avecExcel) { grille.gabaritFichier = projet.grille.gabaritFichier; grille.gabaritExcel = projet.grille.gabaritExcel; }
   projet.grille = grille;
   return sauverEtRendre(dossier, projet, { verification: verifierGrille(grille), source, avertissement });

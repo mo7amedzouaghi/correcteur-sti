@@ -87,3 +87,8 @@ tbody tr.cliquable { cursor: pointer; } tbody tr.cliquable:hover td { background
 .toast { position: fixed; bottom: 20px; right: 20px; background: var(--bleu); color: #fff; padding: 10px 16px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.2); z-index: 20; max-width: 480px; }
 .toast.err { background: var(--rouge); }
 code { background: #eef1f6; padding: 1px 5px; border-radius: 4px; }
+.pastille { color: #3fbf7f; font-style: normal; margin-left: auto; font-size: 12px; }
+.menu-maj { margin-top: 10px; border-top: 1px solid rgba(255,255,255,.12); border-radius: 0 0 8px 8px; }
+.liste-regles { margin: 4px 0 0; padding-left: 20px; color: var(--doux); }
+.liste-regles li { margin: 4px 0; }
+#majBarre { height: 100%; width: 0; background: var(--accent); transition: width .2s; }

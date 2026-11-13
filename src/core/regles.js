@@ -251,8 +251,39 @@ function evaluerCritere(crit, ctx) {
   return { points: Math.min(pts, crit.points), max: crit.points, details, manuel: false, observations: [] };
 }
 
-/** Pénalités globales détectées automatiquement (−x par erreur, appliquées une seule fois si demandé). */
-function detecterErreurs(ctx) {
+/** Noms de fichiers précis (sans joker) attendus par les règles d'une grille. */
+function fichiersAttendus(criteres) {
+  const noms = new Set();
+  const parcourir = regles => {
+    for (const r of regles || []) {
+      for (const f of [].concat(r.fichier || [])) if (/^[\w.-]+\.\w+$/.test(f)) noms.add(f.toLowerCase());
+      if (r.regles) parcourir(r.regles);
+      if (r.souple) parcourir([r.souple]);
+    }
+  };
+  for (const c of criteres || []) parcourir(c.regles);
+  return noms;
+}
+
+/** Dossier de travail = dossier commun à tous les fichiers de l'élève (ex. SW123456/ ou www/SW123456/). */
+function racineCommune(fichiers) {
+  const dirs = fichiers.map(f => f.rel.split('/').slice(0, -1));
+  if (!dirs.length) return [];
+  let pref = dirs[0];
+  for (const d of dirs) {
+    let i = 0;
+    while (i < pref.length && i < d.length && pref[i].toLowerCase() === d[i].toLowerCase()) i++;
+    pref = pref.slice(0, i);
+  }
+  return pref;
+}
+
+/**
+ * Pénalités globales détectées automatiquement (−x par type d'erreur, appliquées une seule fois).
+ * opts.attendus : fichiers attendus (Set) ; opts.racine : segments du dossier de travail ;
+ * opts.fichierHorsDossier : A10, fichier présent mais dans un sous-dossier (défaut : actif).
+ */
+function detecterErreurs(ctx, opts = {}) {
   const erreurs = [];
   const UNITE = /^(padding|margin|width|height|min-width|max-width|min-height|max-height|font-size|top|left|right|bottom|border-width|border-radius|line-height|letter-spacing)(-(top|right|bottom|left))?$/;
   for (const f of ctx.fichiers) {
@@ -274,7 +305,17 @@ function detecterErreurs(ctx) {
       if (o !== c) erreurs.push({ fichier: f.rel, type: 'accolades PHP', message: `${o} « { » pour ${c} « } »` });
     }
   }
+  // A10 : un fichier demandé est présent mais pas dans le dossier de travail (rangé dans un sous-dossier)
+  if (opts.fichierHorsDossier !== false && opts.attendus) {
+    const profondeur = f => f.rel.split('/').length - 1 - (opts.racine || []).length;
+    for (const nom of opts.attendus) {
+      const trouves = ctx.fichiers.filter(f => f.rel.split('/').pop().toLowerCase() === nom);
+      if (trouves.length && trouves.every(f => profondeur(f) > 0)) {
+        erreurs.push({ fichier: trouves[0].rel, type: 'fichier hors du dossier de travail', message: `« ${trouves[0].rel.split('/').pop()} » est dans un sous-dossier (${trouves[0].rel})` });
+      }
+    }
+  }
   return erreurs;
 }
 
-module.exports = { evaluerCritere, evaluerRegle, detecterErreurs, parserCss, corpsFonction, arrondir, fichiersCorrespondants };
+module.exports = { evaluerCritere, evaluerRegle, detecterErreurs, fichiersAttendus, racineCommune, parserCss, corpsFonction, arrondir, fichiersCorrespondants };

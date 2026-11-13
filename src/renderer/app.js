@@ -29,7 +29,7 @@ function sauver() {
   minuteur = setTimeout(() => appel('projet:sauver', dossier, projet), 400);
 }
 function aller(vue) {
-  if (!projet && vue !== 'projet') { toast('Créez ou ouvrez d\'abord un projet.'); return; }
+  if (!projet && vue !== 'projet' && vue !== 'maj') { toast('Créez ou ouvrez d\'abord un projet.'); return; }
   $$('#menu button').forEach(b => b.classList.toggle('actif', b.dataset.vue === vue));
   $$('.vue').forEach(v => v.classList.toggle('actif', v.id === 'vue-' + vue));
 }
@@ -48,7 +48,9 @@ function message(cible, msgs) {
   const modeles = await appel('grille:modeles') || [];
   $('#selModele').innerHTML += modeles.map(m => `<option value="${esc(m.fichier)}">${esc(m.nom)} (${m.nb} critères /${m.total})</option>`).join('');
   window.sti.surProgres(progres);
+  window.sti.surMajProgres(majProgres);
   toutAfficher();
+  initMaj();
 })();
 
 $$('#menu button').forEach(b => b.onclick = () => aller(b.dataset.vue));
@@ -145,6 +147,7 @@ async function proposerGrille(auto) {
   const g = projet.grille;
   const avecRegles = g.criteres.some(c => (c.regles || []).length);
   if (!auto && avecRegles && !g.gabaritExcel && !window.confirm('Remplacer la grille actuelle par une nouvelle proposition ?')) return;
+  projet.totalGrille = Number($('#totalGrille').value) > 0 ? Number($('#totalGrille').value) : 40;
   const b = $('#btnProposer');
   b.disabled = true; b.textContent = '⏳ Analyse de l\'énoncé…';
   const r = await appel('grille:proposer', dossier, projet);
@@ -187,9 +190,11 @@ async function bilanGrille(v) {
   if (sansRegle) m.push(['att', `${sansRegle} critère(s) sans règle automatique : ils seront à noter manuellement.`]);
   message('#grilleBilan', [...messageProposition, ...m]);
 }
+$('#totalGrille').addEventListener('input', e => { if (projet) { projet.totalGrille = Number(e.target.value) > 0 ? Number(e.target.value) : 40; sauver(); } });
 function afficherGrille() {
   const g = projet?.grille;
   const tb = $('#tabGrille tbody');
+  if (projet) $('#totalGrille').value = projet.totalGrille ?? 40;
   if (!g) { tb.innerHTML = ''; return; }
   tb.innerHTML = g.criteres.map((c, i) => `<tr data-i="${i}">
     <td><input data-k="colonne" value="${esc(c.colonne)}" style="width:52px"></td>
@@ -446,3 +451,58 @@ function toutAfficher() {
   afficherEnonce(); afficherGrille(); afficherRessources(); afficherEleves(); afficherTolerance(); afficherResultats(); afficherDetail();
   if (projet.grille.criteres.length) bilanGrille();
 }
+
+// ---------- mise à jour ----------
+let majInfo = null;
+const notesLisibles = t => String(t || '').split('**').join('').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/^#+\s*/gm, '').trim();
+async function majVerifier(silencieux) {
+  const b = $('#btnMajVerifier');
+  b.disabled = true;
+  const r = await window.sti.appel('maj:verifier');
+  b.disabled = false;
+  if (r && r.erreur) {
+    if (!silencieux) message('#majEtat', [['err', r.erreur]]);
+    return null;
+  }
+  majInfo = r;
+  $('#majPastille').classList.toggle('cache', !r.disponible);
+  $('#btnMajInstaller').classList.toggle('cache', !r.disponible);
+  $('#majNotes').classList.toggle('cache', !r.disponible || !r.notes);
+  if (r.disponible) {
+    message('#majEtat', [['ok', `La version ${r.derniere} est disponible (vous utilisez la version ${r.versionActuelle}).`]]);
+    $('#majNotes').textContent = notesLisibles(r.notes);
+    if (silencieux) toast(`Mise à jour ${r.derniere} disponible : onglet « Mise à jour ».`);
+  } else if (!silencieux) {
+    message('#majEtat', [['ok', r.derniere ? `correcteurAuto est à jour (version ${r.versionActuelle}).` : 'Aucune version n\'est encore publiée sur GitHub.']]);
+  }
+  return r;
+}
+function majProgres(d) {
+  $('#majProgres').classList.remove('cache');
+  const pct = d.total ? Math.min(100, Math.round(100 * d.recu / d.total)) : 0;
+  $('#majBarre').style.width = pct + '%';
+  $('#majTexte').textContent = `Téléchargement : ${(d.recu / 1048576).toFixed(1)} Mo${d.total ? ' / ' + (d.total / 1048576).toFixed(1) + ' Mo (' + pct + ' %)' : ''}`;
+}
+async function initMaj() {
+  const cfg = await appel('maj:config');
+  if (!cfg) return;
+  $('#majVersion').textContent = 'v' + cfg.version;
+  $('#majAuto').checked = cfg.majAuto;
+  if (cfg.majAuto) majVerifier(true);
+}
+$('#btnMajVerifier').onclick = () => majVerifier(false);
+$('#btnMajPage').onclick = () => appel('maj:page');
+$('#majAuto').onchange = e => appel('maj:config', { majAuto: e.target.checked });
+$('#btnMajInstaller').onclick = async () => {
+  if (!majInfo?.disponible) return;
+  const b = $('#btnMajInstaller');
+  b.disabled = true; $('#btnMajVerifier').disabled = true;
+  message('#majEtat', [['ok', `Téléchargement de la version ${majInfo.derniere}…`]]);
+  $('#majBarre').style.width = '0';
+  const r = await window.sti.appel('maj:installer');
+  b.disabled = false; $('#btnMajVerifier').disabled = false;
+  $('#majProgres').classList.add('cache');
+  if (r && r.erreur) return message('#majEtat', [['err', r.erreur]]);
+  if (r.lance) message('#majEtat', [['ok', 'Installateur lancé : l\'application se ferme pour terminer la mise à jour.']]);
+  else message('#majEtat', [['att', `La version ${r.derniere} est téléchargée. Cliquez de nouveau sur « Télécharger et installer » quand vous voulez l'installer.`]]);
+};

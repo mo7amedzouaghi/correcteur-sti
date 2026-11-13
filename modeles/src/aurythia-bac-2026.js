@@ -64,9 +64,10 @@ add('I', 'Etape 2', '1', 'a', 'header + h1 (texte) + nav + 3 liens (textes, cibl
   { type: 'html', label: 'texte « Ajout d\'un bijou »', fichier: IDX, selecteur: 'nav a, a', texte: R`ajout d.un bijou` },
   { type: 'html', label: 'texte « Evaluation d\'un bijou »', fichier: IDX, selecteur: 'nav a, a', texte: R`[ée]valuation d.un bijou` },
   { type: 'html', label: 'texte « Liste des bijoux originaux »', fichier: IDX, selecteur: 'nav a, a', texte: R`liste des bijoux originaux` },
-  { type: 'html', label: 'lien ajout.html + cible iframe', fichier: IDX, selecteur: 'a[href*="ajout.html"]', cibleIframe: true },
-  { type: 'html', label: 'lien evaluation.html + cible iframe', fichier: IDX, selecteur: 'a[href*="evaluation.html"]', cibleIframe: true },
-  { type: 'html', label: 'lien liste.php + cible iframe', fichier: IDX, selecteur: 'a[href*="liste.php"]', cibleIframe: true }]);
+  // B4 (élève en difficulté) : le lien existe mais la cible iframe est fausse => moitié des points, sans cascade
+  { type: 'html', label: 'lien ajout.html + cible iframe', fichier: IDX, selecteur: 'a[href*="ajout.html"]', cibleIframe: true, indice: 'href\\s*=\\s*["\']?ajout\\.html' },
+  { type: 'html', label: 'lien evaluation.html + cible iframe', fichier: IDX, selecteur: 'a[href*="evaluation.html"]', cibleIframe: true, indice: 'href\\s*=\\s*["\']?evaluation\\.html' },
+  { type: 'html', label: 'lien liste.php + cible iframe', fichier: IDX, selecteur: 'a[href*="liste.php"]', cibleIframe: true, indice: 'href\\s*=\\s*["\']?liste\\.php' }]);
 add('J', 'Etape 2', '1', 'a', 'main + section + iframe + aside + img', 1.25, [
   { type: 'html', label: 'main', fichier: IDX, selecteur: 'main' },
   { type: 'html', label: 'section dans main', fichier: IDX, selecteur: 'main section' },

@@ -145,10 +145,30 @@ E3['index.html'] = E1['index.html'].replace('href="mesStyles.css"', 'href="MesSt
 E3['ajout.php'] = E1['ajout.php'].replace('Ajout effectué avec succès', 'Le bijou a bien été ajouté').replace("Erreur d'insertion", 'Problème : bijou non ajouté');
 E3['evaluation.php'] = E1['evaluation.php'].replace('Bijou inexistant', "Ce bijou n'existe pas");
 
-for (const [nom, fichiers] of [['SW100001', E1], ['SW100002', E2], ['SW100003', E3]]) {
+// élève 4 : complet, feuille de style écrite avec des sélecteurs combinés (« header h1 ») et la mise en page par margin / margin-left (A11)
+const E4 = { ...E1 };
+E4['mesStyles.css'] = `header h1 { font-family: Arial; text-transform: capitalize; }
+header, footer { background-color: #053860; }
+header a, header, footer { color: #FFFFFF; }
+header nav { padding: 15px; }
+main section { width: 70%; margin-right: 30%; }
+main aside { width: 25%; margin-left: 72%; }
+ul { list-style-type: square; }
+fieldset { border: 3px double #0000FF; font-weight: bold; font-style: italic; }
+input[type="submit"], input[type="reset"] { box-shadow: 5px 5px blue; font-weight: bold; }`;
+
+// élève 5 : complet, mais mesControles.js est rangé dans un sous-dossier « js/ » (A10)
+const E5 = { ...E1 };
+delete E5['mesControles.js'];
+E5['js/mesControles.js'] = E1['mesControles.js'];
+
+for (const [nom, fichiers] of [['SW100001', E1], ['SW100002', E2], ['SW100003', E3], ['SW100004', E4], ['SW100005', E5]]) {
   const d = path.join(base, nom);
   fs.rmSync(d, { recursive: true, force: true });
   fs.mkdirSync(d, { recursive: true });
-  for (const [f, c] of Object.entries(fichiers)) fs.writeFileSync(path.join(d, f), c);
+  for (const [f, c] of Object.entries(fichiers)) {
+    fs.mkdirSync(path.dirname(path.join(d, f)), { recursive: true });
+    fs.writeFileSync(path.join(d, f), c);
+  }
 }
 console.log('Fixtures créées dans', base);

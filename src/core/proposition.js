@@ -4,14 +4,30 @@
  * Repère la structure (Etape / Partie / Exercice, questions 1) 2)…, sous-questions a) b)…),
  * puis, pour chaque question, les éléments vérifiables : fichiers, balises, liens, fonctions JS,
  * propriétés CSS, requêtes SQL, messages… Chaque élément devient une règle automatique.
+ *
+ * Barème : la grille est toujours proposée sur 40 points (note sur 20 = total / 2) et répartie
+ * ÉQUITABLEMENT, en multiples de 0,25 :
+ *  - points annoncés dans le sujet (tableau de barème ou titres « Exercice 2 (8 points) ») ramenés sur 40 ;
+ *  - « 0,25 pt par question / par blanc » : chaque question de la partie reçoit la même part ;
+ *  - sinon, répartition selon le nombre d'éléments à vérifier (au moins 0,25 par critère).
+ * La somme est toujours exactement égale au total (méthode du plus fort reste).
  * Le résultat est une PROPOSITION : l'enseignant ajuste libellés, barème et règles.
  */
+
+const PAS = 0.25;
 
 // Parties du devoir : on garde le mot et le titre du sujet (Exercice 2 : Les tableaux, Partie A, Activité 1…)
 const RX_ETAPE = /^\s*([ée]tape|partie|exercice|activit[ée]|t[âa]che|probl[èe]me|situation|dossier|section|travail)\s*(?:n[°o]\s*)?(\d+|[IVX]+|[A-H])\b\s*(?:\([^)]*\))?\s*[:.\-–]?\s*(.*)$/i;
 const RX_QUESTION = /^\s*(?:question\s*|q\s*)?(\d{1,2})\s*[)\.\-:]\s+(.+)$/i;
 const RX_SOUS = /^\s*([a-h])\s*[)\.]\s+(.+)$/;
+// « 0,25 pt par question », « 1 point par blanc »… dans le titre d'une partie
+const RX_UNITAIRE = /(\d+(?:[.,]\d+)?)\s*(?:pts?|points?)\s*(?:par|\/|pour chaque|chacune?)\s*(question|blanc|item|r[ée]ponse|case|ligne)/i;
+// partie à choix multiples : les lignes a) b) c) sont des propositions de réponse, pas des sous-questions
+const RX_QCM = /encercler|cocher|bonne r[ée]ponse|qcm|choix multiple|vrai ou faux|r[ée]pondre par vrai/i;
+// épreuve pratique : il faut créer / développer un fichier, une page, une table, une fonction…
+const RX_PRATIQUE = /(cr[ée]er|d[ée]velopper|importer|exporter|ajouter au fichier)[^\n]{0,60}(["«]?[\w-]+\.(html?|css|js|php|sql|py)\b|base de donn|table\b|fonction)/i;
 const majuscule = s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+const fr = n => String(Math.round(n * 100) / 100).replace('.', ',');
 
 const CSS_MOTS = [
   [/police|font/i, 'font-family|font', 'police'],
@@ -46,9 +62,15 @@ function motifSouple(texte) {
 function structure(texte) {
   const lignes = texte.split(/\r?\n/).map(nettoyer).filter(Boolean);
   const feuilles = [];
+  const parties = {}; // nom de la partie -> { points, egal, unite, qcm }
   let etape = '', etapeVue = false, q = null, sq = null, courant = null, consignesEtape = '';
-  const pointsParties = {};
+  // une partie sans question numérotée (ex. « Compléter les codes ») reste une feuille à elle seule
+  const retirerPartieVide = () => {
+    const d = feuilles[feuilles.length - 1];
+    if (d && d.vide && d.etape === etape) { feuilles.pop(); consignesEtape = d.texte; courant = null; }
+  };
   const nouvelle = (question, sous, titre) => {
+    retirerPartieVide();
     courant = { etape, question, sousQuestion: sous, titre, texte: titre, consignes: consignesEtape };
     feuilles.push(courant);
   };
@@ -58,10 +80,16 @@ function structure(texte) {
       // nom de la partie tel qu'écrit dans le sujet, avec son titre s'il est court
       const titre = m[3].replace(/\s*\(.*$/, '').trim();
       etape = `${majuscule(m[1])} ${m[2].toUpperCase()}` + (titre && titre.length <= 50 ? ' : ' + titre : '');
-      // points annoncés dans le titre : « Exercice 2 (8 points) »
+      // points annoncés dans le titre : « Exercice 2 (8 points) » ; unité : « 0,25 pt par question »
       const p = /\(?\s*(\d{1,2}(?:[.,]\d{1,2})?)\s*(?:points?|pts?)\s*\)?/i.exec(l);
-      if (p) pointsParties[etape] = parseFloat(p[1].replace(',', '.'));
-      etapeVue = true; q = null; sq = null; courant = null; consignesEtape = '';
+      const u = RX_UNITAIRE.exec(l);
+      parties[etape] = {
+        points: p ? parseFloat(p[1].replace(',', '.')) : null,
+        egal: !!u, unite: u ? parseFloat(u[1].replace(',', '.')) : null, qcm: RX_QCM.test(l)
+      };
+      etapeVue = true; q = null; sq = null; consignesEtape = '';
+      courant = { etape, question: '', sousQuestion: '', titre: titre || etape, texte: '', consignes: '', vide: true };
+      feuilles.push(courant);
       continue;
     }
     if ((m = RX_QUESTION.exec(l)) && (etapeVue || feuilles.length || /^1\b/.test(m[1]))) {
@@ -69,13 +97,14 @@ function structure(texte) {
       nouvelle(q, '', m[2]);
       continue;
     }
-    if ((m = RX_SOUS.exec(l)) && !q && etapeVue) {
+    const qcm = !!parties[etape]?.qcm;
+    if (!qcm && (m = RX_SOUS.exec(l)) && !q && etapeVue) {
       // partie sans question numérotée : a), b)… sont les questions
       sq = null; nouvelle(m[1], '', m[2]);
       courant.contexte = consignesEtape;
       continue;
     }
-    if ((m = RX_SOUS.exec(l)) && q) {
+    if (!qcm && (m = RX_SOUS.exec(l)) && q) {
       // la question parente devient un simple titre si elle a des sous-questions
       const parent = feuilles[feuilles.length - 1];
       if (parent && parent.question === q && !parent.sousQuestion && !sq) {
@@ -87,12 +116,13 @@ function structure(texte) {
       } else { sq = m[1]; nouvelle(q, sq, m[2]); courant.contexte = parent?.contexte || ''; }
       continue;
     }
-    if (courant) courant.texte += '\n' + l;
+    if (courant) courant.texte += (courant.texte ? '\n' : '') + l;
     else consignesEtape += '\n' + l;
   }
   // sujet sans parties : la grille est organisée par question
   if (!etapeVue) for (const f of feuilles) f.etape = `Question ${f.question}`;
-  feuilles.pointsParties = pointsParties;
+  feuilles.parties = parties;
+  feuilles.pointsParties = Object.fromEntries(Object.entries(parties).filter(([, v]) => v.points > 0).map(([k, v]) => [k, v.points]));
   return feuilles;
 }
 
@@ -134,7 +164,7 @@ function reglesDepuisTexte(f) {
     const tag = m.slice(1, -1).toLowerCase();
     ajout({ type: 'html', fichier: cible, selecteur: tag, label: `élément <${tag}>` });
   }
-  for (const m of t.matchAll(/(?:lien vers (?:la page )?|vers la page )"?([\w-]+\.(?:html?|php))"?/gi)) ajout({ type: 'html', fichier: cible, selecteur: `a[href*="${m[1]}"]`, label: `lien vers ${m[1]}` });
+  for (const m of t.matchAll(/(?:lien vers (?:la page )?|vers la page )"?([\w-]+\.(?:html?|php))"?/gi)) ajout({ type: 'html', fichier: cible, selecteur: `a[href*="${m[1]}"]`, indice: `href\\s*=\\s*["']?${echapper(m[1])}`, label: `lien vers ${m[1]}` });
   for (const m of t.matchAll(/l'image (?:nomm[ée]e )?"?([\w-]+\.(?:jpe?g|png|gif|webp))"?/gi)) ajout({ type: 'html', fichier: cible, selecteur: `img[src*="${m[1]}"]`, label: `image ${m[1]}` });
   for (const m of t.matchAll(/contient le texte\s*"\s*([^"]{3,80})"/gi)) ajout({ type: 'regex', fichier: cible, motif: motifSouple(m[1]), label: `texte « ${m[1].trim()} »` });
   if (/lier|reli[ée]e?s? (?:au|aux) fichiers?/i.test(t)) {
@@ -184,13 +214,11 @@ function reglesDepuisTexte(f) {
   return regles;
 }
 
-function arrondir(x) { return Math.round(x * 4) / 4; }
-
 /** Coupe le titre d'une question pour en faire un libellé court. */
 function libelleCourt(titre) {
-  return titre.replace(/\s*:$/, '')
-    .replace(/\s+(tout en|permettant|qui permet|afin d|situ[ée]|conform[ée]ment|en lui attribuant|dans votre dossier|via le formulaire|selon le format).*$/i, '')
-    .slice(0, 90);
+  const s = titre.replace(/\s*:?\s*[.…_]{3,}.*$/, '').replace(/\s*:$/, '')
+    .replace(/\s+(tout en|permettant|qui permet|afin d|situ[ée]|conform[ée]ment|en lui attribuant|dans votre dossier|via le formulaire|selon le format).*$/i, '');
+  return s.length > 90 ? s.slice(0, 87).replace(/\s+\S*$/, '') + '…' : s;
 }
 
 /**
@@ -219,16 +247,53 @@ function baremeEnonce(texte, feuilles) {
 }
 
 /**
+ * Répartit `unites` (nombre entier de pas de 0,25) entre des éléments selon leurs poids,
+ * par la méthode du plus fort reste : la somme est exacte et chaque élément reçoit au moins
+ * `min` unité (équité : aucun critère à 0). À poids égaux, les premiers reçoivent le reste.
+ */
+function repartirUnites(poids, unites, min = 1) {
+  const n = poids.length;
+  if (!n) return [];
+  if (n > unites) min = 0; // plus de critères que d'unités : le minimum n'est plus tenable
+  const w = poids.map(p => Math.max(Number(p) || 0, 1e-9));
+  const S = w.reduce((a, b) => a + b, 0);
+  const ideal = w.map(p => unites * p / S);
+  const base = ideal.map(x => Math.max(min, Math.floor(x + 1e-9)));
+  let total = base.reduce((a, b) => a + b, 0);
+  while (total > unites) { // les minimums ont fait dépasser : on retire aux plus gros
+    let k = -1;
+    for (let i = 0; i < n; i++) if (base[i] > min && (k < 0 || base[i] - ideal[i] > base[k] - ideal[k])) k = i;
+    if (k < 0) break;
+    base[k]--; total--;
+  }
+  while (total < unites) { // le reste va aux plus forts restes
+    let k = 0;
+    for (let i = 1; i < n; i++) if (ideal[i] - base[i] > ideal[k] - base[k] + 1e-12) k = i;
+    base[k]++; total++;
+  }
+  return base;
+}
+
+const poidsFeuille = f => Math.max(1, (f.regles || []).filter(r => r.type !== 'manuel').length);
+
+/** Épreuve théorique : aucune question ne demande de créer / développer un fichier, une table, une fonction… */
+function detecterTheorique(feuilles) {
+  return !feuilles.some(f => RX_PRATIQUE.test(f.titre + '\n' + f.texte));
+}
+
+/**
  * Propose une grille. Si `grilleExistante` contient déjà des colonnes (grille Excel importée),
  * leurs identifiants et barèmes sont conservés : on remplit seulement libellés et règles.
+ * Sinon la grille est calculée sur `total` points (40 par défaut), répartis équitablement.
  */
-function proposerGrille(texteEnonce, { total = 40, noteSur = 20, grilleExistante = null } = {}) {
+function proposerGrille(texteEnonce, { total = 40, noteSur = 20, grilleExistante = null, type = 'pratique' } = {}) {
   const feuilles = structure(texteEnonce || '');
   if (!feuilles.length) throw new Error('Aucune question repérée dans l\'énoncé (numérotation 1), 2)… ou a), b)… attendue).');
+  const theorique = type === 'theorique' || detecterTheorique(feuilles);
   for (const f of feuilles) {
     // le tableau de barème imprimé en fin d'énoncé ne fait pas partie de la dernière question
     f.texte = f.texte.split(/\n(?:grille d.[ée]valuation|bar[èe]me)/i)[0];
-    f.regles = reglesDepuisTexte(f);
+    f.regles = theorique ? [{ type: 'manuel', label: 'à noter par l\'enseignant' }] : reglesDepuisTexte(f);
     f.libelle = libelleCourt(f.titre);
   }
   const existants = grilleExistante?.criteres?.filter(c => c.points > 0) || [];
@@ -250,43 +315,59 @@ function proposerGrille(texteEnonce, { total = 40, noteSur = 20, grilleExistante
         c.propose = true;
       });
     }
-    return { ...grilleExistante, propose: true, criteres: grilleExistante.criteres };
+    return { ...grilleExistante, propose: true, theorique, criteres: grilleExistante.criteres };
   }
-  // nouvelle grille : barème de l'énoncé s'il existe, sinon proportionnel au nombre d'éléments vérifiables
-  const repartir = (liste, somme) => {
-    const poids = liste.map(f => Math.max(1, f.regles.length));
-    const tp = poids.reduce((a, b) => a + b, 0);
-    let reste = somme;
-    liste.forEach((f, i) => {
-      f.points = i === liste.length - 1 ? reste : Math.max(0.25, arrondir(somme * poids[i] / tp));
-      reste = Math.round((reste - f.points) * 100) / 100;
+
+  // ----- nouvelle grille sur `total` points, répartie équitablement -----
+  const U = Math.max(1, Math.round(total / PAS));
+  const parties = feuilles.parties || {};
+  const noms = [...new Set(feuilles.map(f => f.etape))];
+  // les sous-questions partagent les points de leur question ; « N pt par question » => parts égales entre questions
+  const attribuerGroupe = (liste, unites, egal) => {
+    const ordre = [...new Set(liste.map(f => f.question))];
+    const parQuestion = ordre.map(qn => liste.filter(f => f.question === qn));
+    const uq = repartirUnites(parQuestion.map(fs => egal ? 1 : fs.reduce((a, f) => a + poidsFeuille(f), 0)), unites, 1);
+    parQuestion.forEach((fs, i) => {
+      const us = repartirUnites(fs.map(poidsFeuille), uq[i], 1);
+      fs.forEach((f, j) => { f.points = us[j] * PAS; });
     });
   };
   const bareme = baremeEnonce(texteEnonce, feuilles);
-  const pp = feuilles.pointsParties || {};
-  const parties = [...new Set(feuilles.map(f => f.etape))];
-  let sourceBareme = 'réparti selon le nombre d\'éléments à vérifier';
-  if (!bareme && parties.length > 1 && parties.every(p => pp[p] > 0)) {
-    // points annoncés dans les titres des parties (Exercice 1 (5 points)…)
-    const s = parties.reduce((a, p) => a + pp[p], 0);
-    for (const p of parties) repartir(feuilles.filter(f => f.etape === p), arrondir(pp[p] * total / s));
-    sourceBareme = `tiré des points annoncés dans le sujet (${parties.map(p => pp[p]).join(' / ')} sur ${s}${s !== total ? ', ramené sur ' + total : ''})`;
-  } else if (bareme) {
+  const annonce = noms.length > 0 && noms.every(n => parties[n]?.points > 0);
+  let sourceBareme;
+  if (bareme) {
     const s = bareme.reduce((a, g) => a + g.points, 0);
-    for (const g of bareme) repartir(feuilles.filter(g.filtre), arrondir(g.points * total / s));
-    sourceBareme = `tiré du barème de l'énoncé (${bareme.map(g => g.points).join(' / ')} sur ${s}, ramené sur ${total})`;
-  } else repartir(feuilles, total);
+    const ug = repartirUnites(bareme.map(g => g.points), U, 1);
+    bareme.forEach((g, k) => { const l = feuilles.filter(g.filtre); attribuerGroupe(l, ug[k], !!parties[l[0]?.etape]?.egal); });
+    sourceBareme = `tiré du barème de l'énoncé (${bareme.map(g => fr(g.points)).join(' / ')} sur ${fr(s)}, ramené sur ${fr(total)})`;
+  } else if (annonce) {
+    const s = noms.reduce((a, n) => a + parties[n].points, 0);
+    const up = repartirUnites(noms.map(n => parties[n].points), U, 1);
+    noms.forEach((n, k) => attribuerGroupe(feuilles.filter(f => f.etape === n), up[k], !!parties[n].egal));
+    sourceBareme = `tiré des points annoncés dans le sujet (${noms.map(n => fr(parties[n].points)).join(' / ')} sur ${fr(s)}${Math.abs(s - total) > 1e-9 ? ', ramené sur ' + fr(total) : ''})`;
+    const egales = noms.filter(n => parties[n].egal);
+    if (egales.length) sourceBareme += `, puis réparti également entre les questions des parties « points par question / par blanc » (${egales.length})`;
+  } else {
+    const up = repartirUnites(noms.map(n => feuilles.filter(f => f.etape === n).reduce((a, f) => a + poidsFeuille(f), 0)), U, 1);
+    noms.forEach((n, k) => attribuerGroupe(feuilles.filter(f => f.etape === n), up[k], false));
+    sourceBareme = 'réparti selon le nombre d\'éléments à vérifier (équitable, au moins 0,25 par critère)';
+  }
   const criteres = feuilles.map((f, i) => {
-    const p = Math.max(0, f.points);
     const id = 'Q' + (i + 1);
+    let libelle = f.libelle;
+    // partie sans question numérotée annonçant « 0,25 pt par blanc » : on rappelle le nombre d'éléments
+    const p = parties[f.etape];
+    if (f.vide && p?.egal && p.unite > 0 && p.points > 0) libelle += ` (${Math.round(p.points / p.unite)} × ${fr(f.points / Math.round(p.points / p.unite))} pt)`;
     return {
-      id, colonne: id, etape: f.etape, question: f.question, sousQuestion: f.sousQuestion, libelle: f.libelle,
-      points: p, regles: f.regles.length ? f.regles : [{ type: 'manuel', label: 'à noter' }], propose: true
+      id, colonne: id, etape: f.etape, question: f.question, sousQuestion: f.sousQuestion, libelle,
+      points: f.points, regles: f.regles.length ? f.regles : [{ type: 'manuel', label: 'à noter' }], propose: true
     };
   });
-  const somme = criteres.reduce((a, c) => a + c.points, 0);
-  return { titre: 'Grille proposée', total: Math.round(somme * 100) / 100, noteSur, criteres, propose: true,
-    remarques: ['Grille proposée automatiquement à partir de l\'énoncé : vérifiez libellés, barème et règles.', 'Barème ' + sourceBareme + '.'] };
+  const somme = Math.round(criteres.reduce((a, c) => a + c.points, 0) * 100) / 100;
+  const remarques = ['Grille proposée automatiquement à partir de l\'énoncé : vérifiez libellés, barème et règles.',
+    `Barème sur ${fr(somme)} points (note sur ${noteSur} = total × ${noteSur} / ${fr(somme)}) : ${sourceBareme}.`];
+  if (theorique) remarques.push('Épreuve théorique : tous les critères sont à noter par l\'enseignant (saisie des points par élève).');
+  return { titre: 'Grille proposée', total: somme, noteSur, criteres, propose: true, theorique, remarques };
 }
 
-module.exports = { proposerGrille, structure, reglesDepuisTexte };
+module.exports = { proposerGrille, structure, reglesDepuisTexte, repartirUnites, detecterTheorique };

@@ -1,6 +1,6 @@
 {
   "name": "correcteur-sti",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "correcteurAuto – correction des devoirs pratiques et théoriques STI (2e, 3e, Bac)",
   "main": "src/main/main.js",
   "author": "Mohamed Zouaghi",
@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "electron .",
-    "test": "node tests/run-exemple.js",
+    "test": "node tests/run-exemple.js && node tests/test-proposition.js && node tests/test-maj.js",
     "dist": "electron-builder --config build/auto.json",
     "images": "electron build/images/rendu.js"
   },

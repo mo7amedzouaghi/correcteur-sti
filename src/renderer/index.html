@@ -20,6 +20,7 @@
       <button data-vue="eleves"><span>5</span>Travaux des élèves</button>
       <button data-vue="tolerance"><span>6</span>Tolérance</button>
       <button data-vue="correction"><span>7</span>Correction &amp; grilles</button>
+      <button data-vue="maj" class="menu-maj"><span>⟳</span>Mise à jour <i id="majPastille" class="pastille cache">●</i></button>
     </nav>
     <div id="infoProjet" class="info-projet">Aucun projet ouvert</div>
     <div class="auteur-app">© Mohamed Zouaghi</div>
@@ -67,6 +68,7 @@
       <p class="aide">Une grille est proposée automatiquement dès que l'énoncé est déposé. Vous pouvez aussi téléverser la grille Excel officielle (une colonne par critère, ligne « Détail ») : la proposition garde alors ses colonnes et son barème, et ajoute libellés et règles.</p>
       <div class="actions">
         <button class="principal" id="btnProposer" title="Analyse l'énoncé déposé et propose critères, barème et règles automatiques">✨ Proposer une grille depuis l'énoncé</button>
+        <label class="inline" title="Total de la grille proposée ; la note sur 20 = total / 2. Répartition équitable, en multiples de 0,25.">Sur <input type="number" id="totalGrille" min="1" step="0.25" class="court" value="40"> points</label>
         <button class="principal" id="btnGrilleExcel">Téléverser une grille (Excel / JSON)</button>
         <select id="selModele"><option value="">— Modèle de règles —</option></select>
         <button id="btnAppliquerModele">Appliquer le modèle</button>
@@ -135,7 +137,7 @@
           <label class="case"><input type="checkbox" name="casseToleree"> Majuscules / minuscules tolérées partout : HTML, CSS, JS, PHP, noms de variables (A5)</label>
           <label class="case"><input type="checkbox" name="variantesSouples"> Message affiché reformulé accepté ; mise en page par margin / margin-left acceptée (A7, A11)</label>
           <label class="case"><input type="checkbox" name="solutionsEquivalentes"> Accepter les solutions équivalentes (float / flex / margin, id / class, sélecteurs combinés « div h1 », mysqli / PDO…)</label>
-          <label class="case"><input type="checkbox" name="nonOfficielZero"> Ne pas évaluer ce qui n'est pas conforme aux documents officiels</label>
+          <label class="case"><input type="checkbox" name="fichierHorsDossier"> Fichier demandé rangé dans un sous-dossier (hors du dossier de travail) : sanctionné une seule fois (A10)</label>
           <label class="inline">Arrondi des notes par critère <select name="arrondi"><option value="0.25">0,25</option><option value="0.5">0,5</option><option value="0.01">0,01</option></select></label>
         </div>
         <div class="carte">
@@ -147,6 +149,15 @@
           <label class="case"><input type="checkbox" name="d_mentionGrille"> Mentionner « correction adaptée » sur les grilles individuelle et collective</label>
         </div>
       </form>
+      <div class="carte">
+        <h3>Toujours appliqué</h3>
+        <ul class="liste-regles">
+          <li>Seules les déclarations, expressions et fonctions conformes aux documents officiels rapportent des points ; <strong>margin / margin-left</strong> et les <strong>sélecteurs combinés</strong> (ex. « div h1 ») sont acceptés (A11).</li>
+          <li>Une erreur reprise de façon cohérente ailleurs n'est pas sanctionnée en cascade ; une erreur de structure n'annule pas les critères qui en dépendent (A3, B4).</li>
+          <li>Code commenté non évalué ; code supplémentaire non demandé non pénalisé (A8). Erreur de syntaxe bloquante : sanctionnée une fois, la logique reste notée (A9).</li>
+          <li>Épreuve théorique : tous les critères sont notés par l'enseignant ; la grille est proposée sur 40 points, répartie équitablement (« 0,25 pt par question » = parts égales).</li>
+        </ul>
+      </div>
     </section>
 
     <!-- 7. CORRECTION -->
@@ -172,6 +183,25 @@
       </div>
     </section>
 
+    <!-- MISE À JOUR -->
+    <section class="vue" id="vue-maj">
+      <h1>Mise à jour</h1>
+      <div class="carte">
+        <p>Version installée : <strong id="majVersion"></strong></p>
+        <div class="actions">
+          <button class="principal" id="btnMajVerifier">Rechercher une mise à jour</button>
+          <button class="principal cache" id="btnMajInstaller">Télécharger et installer</button>
+          <button id="btnMajPage">Voir les versions sur GitHub</button>
+        </div>
+        <div class="bandeau" id="majEtat"></div>
+        <div id="majProgres" class="progres cache"><div class="barre"><div id="majBarre"></div></div><span id="majTexte"></span></div>
+        <pre id="majNotes" class="apercu cache"></pre>
+      </div>
+      <div class="carte">
+        <label class="case"><input type="checkbox" id="majAuto"> Rechercher automatiquement une mise à jour au démarrage</label>
+        <p class="aide">Les mises à jour viennent des versions publiées sur github.com/mo7amedzouaghi/correcteur-sti. Le fichier téléchargé est vérifié (taille et empreinte SHA-256) avant d'être proposé à l'installation, que vous confirmez. Vos projets et réglages ne sont pas modifiés.</p>
+      </div>
+    </section>
   </main>
 
   <div id="modal" class="modal cache"><div class="modal-boite">
