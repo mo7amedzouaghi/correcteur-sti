@@ -48,7 +48,13 @@ const CSS_MOTS = [
   [/taille (de la )?police|font-size/i, 'font-size', 'taille de police'],
   [/m[êe]me ligne|à droite|à gauche|flottant/i, 'float|display|margin(-left|-right)?', 'disposition'],
   [/arrondi|radius/i, 'border-radius', 'coins arrondis'],
-  [/cach|masqu|visib/i, 'display|visibility', 'visibilité']
+  [/cach|masqu|visib/i, 'display|visibility', 'visibilité'],
+  // annexe 2026
+  [/arr[êe]t\w* (le )?flott|sous les (blocs|[ée]l[ée]ments) flottants/i, 'clear', 'arrêt du flottement'],
+  [/flex/i, 'display', 'display: flex'],
+  [/coll[ée]|sticky/i, 'position', 'position collante'],
+  [/position de l.image|image (de fond )?centr/i, 'background-position', 'position de l\'image de fond'],
+  [/d[ée]bord|d[ée]filement|overflow/i, 'overflow', 'débordement']
 ];
 
 const nettoyer = s => s.replace(/[“”«»"]/g, '"').replace(/[’]/g, "'").replace(/\s+/g, ' ').trim();
@@ -172,6 +178,9 @@ function reglesDepuisTexte(f) {
     for (const f2 of fichiers.filter(x => /\.js$/i.test(x))) ajout({ type: 'html', fichier: cible, selecteur: `script[src*="${f2}" i]`, label: `liaison ${f2}` });
   }
   const fn = (t.match(/fonction\s+(?:javascript\s+)?"?([a-zA-Z_]\w*)"?/i) || [])[1];
+  // variable globale (ex. « Déclarer une variable globale code ») : tolérance maximale — déclarée, affectée
+  // implicitement ou valeur retrouvée autrement (DOM) sont toutes acceptées, voir regles.js type « variable ».
+  for (const m of t.matchAll(/variable\s+globale\s+"?([a-zA-Z_]\w*)"?/gi)) ajout({ type: 'variable', fichier: js, nom: m[1], label: `variable globale ${m[1]}` });
   if (estHtml && /clic sur le bouton|formulaire/i.test(t) && php) {
     ajout({ type: 'html', fichier: cible, selecteur: `form[action*="${php}"]`, label: `action ${php}` });
     ajout({ type: 'html', fichier: cible, selecteur: 'form[method="post" i]', label: 'méthode post' });

@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "electron .",
-    "test": "node tests/run-exemple.js && node tests/test-proposition.js && node tests/test-maj.js",
+    "test": "node tests/run-exemple.js && node tests/tolerance-noms-approches.js && node tests/test-proposition.js && node tests/test-maj.js",
     "dist": "electron-builder --config build/auto.json",
     "images": "electron build/images/rendu.js"
   },

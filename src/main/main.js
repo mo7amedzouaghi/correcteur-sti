@@ -174,7 +174,8 @@ gerer('grille:verifier', projet => verifierGrille(projet.grille));
 gerer('grille:proposer', async (dossier, projet) => {
   if (!projet.enonce?.texte?.trim()) throw new Error('Déposez d\'abord l\'énoncé (PDF ou Word contenant du texte).');
   const avecExcel = !!(projet.grille.gabaritExcel && projet.grille.criteres.length);
-  // grille sur 40 points (note sur 20 = total / 2), répartie équitablement ; une grille Excel importée garde son barème
+  // Grille toujours proposée sur 40 points (réglable par le champ « Sur … points »), quel que soit le niveau/type du devoir ;
+  // la « Note » (noteSur, /20 par défaut) n'est qu'un affichage dérivé. Une grille Excel importée garde son barème.
   const total = avecExcel ? projet.grille.total : (Number(projet.totalGrille) > 0 ? Number(projet.totalGrille) : 40);
   const noteSur = projet.grille.noteSur || 20;
   const { proposerGrille } = require('../core/proposition');

@@ -11,6 +11,8 @@ const TOLERANCE_DEFAUT = {
   variantesSouples: true,      // A7 / A11 : message reformulé accepté, mise en page par margin acceptée
   solutionsEquivalentes: true,
   fichierHorsDossier: true,    // A10 : fichier rangé dans un sous-dossier = −0,25, une seule fois
+  nomsApproches: true,         // fichiers, fonctions, id/class renommés ou mal orthographiés recherchés et acceptés
+  arrondiSuperieur: true,      // tolérance maximale : chaque critère arrondi au 0,25 supérieur, jamais au défavorable
   arrondi: 0.25,
   difficulte: {
     ignorerErreursMineures: true,
@@ -98,7 +100,9 @@ async function corrigerEleve(projet, dossierProjet, eleve, opts = {}) {
     partielsElargis: !!(eleve.difficulte && tol.difficulte.pointsPartielsElargis),
     pas: tol.arrondi || 0.25,
     casse: tol.casseToleree !== false,
-    souple: tol.variantesSouples !== false
+    souple: tol.variantesSouples !== false,
+    tolerantNomsFichiers: tol.nomsApproches !== false,
+    arrondiSuperieur: tol.arrondiSuperieur !== false
   };
   const simplifie = !!(eleve.difficulte && tol.difficulte.commentairesSimplifies);
 

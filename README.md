@@ -47,6 +47,11 @@ Installateur dans la page [**Releases**](https://github.com/mo7amedzouaghi/corre
 
 La proposition est un point de départ : vérifiez libellés, barème et règles avant la correction.
 
+- **Grille toujours redistribuée sur 40 points au départ** (`Total /40`), quel que soit le niveau, le type de
+  devoir ou le barème imprimé sur le sujet (sur 20, 25…) : chaque critère est ramené à l'échelle /40, en conservant
+  les proportions du barème officiel. La **Note** affichée (`Note /20` par défaut) n'est qu'une mise à l'échelle
+  de ce total, réglable à tout moment (`projet.grille.noteSur`) sans toucher au détail des critères.
+
 ## Règles de tolérance par défaut
 
 **Tous les élèves**
@@ -59,6 +64,20 @@ La proposition est un point de départ : vérifiez libellés, barème et règles
 - Fichier demandé rangé dans un sous-dossier (hors du dossier de travail) : −0,25, une seule fois.
 - Erreur de syntaxe bloquante (accolade manquante) : sanctionnée une fois, la logique reste notée.
 - Code commenté non évalué ; code supplémentaire non pénalisé ; seul ce qui est conforme aux documents officiels rapporte des points.
+- **Noms approchés recherchés et acceptés** : fichier renommé ou mal orthographié (ex. `suivie.html`, `scriptt.js`,
+  `decor.css` pour le `style.css` demandé — y compris dans un sous-dossier), fonction mal orthographiée
+  (`genereDefi` pour `genererDefi`), identifiant ou classe CSS/HTML approché (`#defis` pour `#defi`, `.boutton`
+  pour `.bouton`). Désactivable projet par projet (`tolerance.nomsApproches = false`).
+- **Champ de formulaire retrouvé par son libellé** quand l'identifiant ne correspond à rien de proche (ex. le
+  champ à côté du texte « Nom du pilote » même si son `id` est différent) — règle `html` avec l'option `libelle`.
+- **Police** : seul le nom de la police demandée est vérifié ; l'absence d'une police de secours générique
+  (`sans-serif`, `serif`…) n'est jamais sanctionnée.
+- **Variable globale** : déclaration explicite (`let`/`var`/`const`), affectation implicite (y compris à
+  l'intérieur d'une fonction) ou valeur conservée/retrouvée autrement via le DOM sont toutes acceptées — seul le
+  rôle (mémoriser une valeur entre deux appels) compte, pas la syntaxe exacte (règle `variable`, détectée
+  automatiquement depuis une consigne « Déclarer une variable globale … »).
+- **Arrondi toujours au 0,25 point supérieur** pour chaque critère (jamais au défavorable de l'élève) — tolérance
+  maximale. Désactivable (`tolerance.arrondiSuperieur = false`) pour revenir à l'arrondi au plus proche.
 
 **Élèves en difficulté d'apprentissage**
 - Erreurs mineures ignorées (casse, frappe, `;` ou guillemet oublié, unité, rangement des fichiers).
@@ -77,8 +96,9 @@ contenant `correcteurAuto-Setup-X.Y.Z.exe`.
 ## Modèles de règles
 
 Un modèle (`modeles/*.json`) associe à chaque colonne de la grille un libellé et des règles
-(`fichier`, `regex`, `html`, `css`, `js`, `ou`, `et`, `manuel`). Modèle fourni :
-**Bac STI 2026 – séance 1 (Aurythia)**, 47 critères, barème officiel /40.
+(`fichier`, `regex`, `html`, `css`, `js`, `variable`, `ou`, `et`, `manuel`). Modèles fournis :
+**Bac STI 2026 – séance 1 (Aurythia)**, 47 critères, barème officiel /40 ;
+**DC2 4 SI1 – SkyTrack** (Lycée Oued Ellil, 11/11/2026), 20 critères, barème imprimé /20 redistribué sur 40.
 Toute grille peut être enregistrée comme nouveau modèle depuis l'application.
 
 ## Développement

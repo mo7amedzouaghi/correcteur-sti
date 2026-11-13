@@ -1,0 +1,731 @@
+{
+  "nom": "DC2 4 SI1 – SkyTrack (Lycée Oued Ellil, 11/11/2026)",
+  "niveau": "Bac",
+  "type": "pratique",
+  "total": 40,
+  "noteSur": 20,
+  "remarques": [
+    "Grille toujours redistribuée sur 40 points (barème imprimé /20 × 2).",
+    "Tolérance maximale : fichiers/fonctions/id/class approchés recherchés, champs retrouvés par leur libellé, variable globale acceptée si déclarée, affectée implicitement ou conservée via le DOM, arrondi au 0,25 supérieur."
+  ],
+  "criteres": [
+    {
+      "id": "A.1",
+      "colonne": "A.1",
+      "etape": "Etape A",
+      "question": "1",
+      "sousQuestion": "",
+      "libelle": "Structure sémantique, titre, liens style.css/script.js (index.html)",
+      "points": 1.5,
+      "regles": [
+        {
+          "type": "ou",
+          "pts": 1,
+          "label": "Balises sémantiques header/nav/section/footer",
+          "regles": [
+            {
+              "type": "et",
+              "regles": [
+                {
+                  "type": "html",
+                  "fichier": "index.html",
+                  "selecteur": "header"
+                },
+                {
+                  "type": "html",
+                  "fichier": "index.html",
+                  "selecteur": "nav"
+                },
+                {
+                  "type": "html",
+                  "fichier": "index.html",
+                  "selecteur": "section"
+                },
+                {
+                  "type": "html",
+                  "fichier": "index.html",
+                  "selecteur": "footer"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "index.html",
+          "selecteur": "title",
+          "motif": "skytrack",
+          "label": "Titre SkyTrack"
+        },
+        {
+          "type": "et",
+          "pts": 1,
+          "label": "style.css puis script.js reliés",
+          "regles": [
+            {
+              "type": "html",
+              "fichier": "index.html",
+              "selecteur": "link[href*=\"style.css\" i]",
+              "label": "style.css relié"
+            },
+            {
+              "type": "html",
+              "fichier": "index.html",
+              "selecteur": "script[src*=\"script.js\" i]",
+              "label": "script.js relié"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A.2",
+      "colonne": "A.2",
+      "etape": "Etape A",
+      "question": "2",
+      "sousQuestion": "",
+      "libelle": "onload=\"afficherDate()\" (index.html)",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "index.html",
+          "selecteur": "body",
+          "motif": "afficherdate\\s*\\(",
+          "label": "appel afficherDate() au chargement"
+        }
+      ]
+    },
+    {
+      "id": "A.3",
+      "colonne": "A.3",
+      "etape": "Etape A",
+      "question": "3",
+      "sousQuestion": "",
+      "libelle": "Entête : logo (id logo) + h1 SkyTrack",
+      "points": 1,
+      "regles": [
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "index.html",
+          "selecteur": "header img#logo",
+          "label": "image #logo dans l'entête"
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "index.html",
+          "selecteur": "header h1",
+          "motif": "skytrack",
+          "label": "h1 « SkyTrack : suivi de drones »"
+        }
+      ]
+    },
+    {
+      "id": "A.4",
+      "colonne": "A.4",
+      "etape": "Etape A",
+      "question": "4",
+      "sousQuestion": "",
+      "libelle": "Menu : lien Accueil + lien Suivi de vol, cible = iframe cadre",
+      "points": 1.5,
+      "regles": [
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "index.html",
+          "selecteur": "nav a[href*=\"accueil.html\" i]",
+          "cibleIframe": true,
+          "label": "lien Accueil → iframe"
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "index.html",
+          "selecteur": "nav a[href*=\"suivi\" i]",
+          "cibleIframe": true,
+          "label": "lien Suivi de vol → iframe"
+        }
+      ]
+    },
+    {
+      "id": "A.5",
+      "colonne": "A.5",
+      "etape": "Etape A",
+      "question": "5",
+      "sousQuestion": "",
+      "libelle": "Section = unique iframe #cadre, affiche accueil.html par défaut",
+      "points": 1,
+      "regles": [
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "index.html",
+          "selecteur": "section iframe#cadre",
+          "label": "iframe #cadre dans la section"
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "index.html",
+          "selecteur": "iframe[src*=\"accueil\" i]",
+          "label": "affiche accueil.html par défaut"
+        }
+      ]
+    },
+    {
+      "id": "A.6",
+      "colonne": "A.6",
+      "etape": "Etape A",
+      "question": "6",
+      "sousQuestion": "",
+      "libelle": "Pied de page : texte + élément en ligne vide #date",
+      "points": 1,
+      "regles": [
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "index.html",
+          "selecteur": "footer",
+          "motif": "skytrack|lyc[ée]e",
+          "label": "texte du pied de page"
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "index.html",
+          "selecteur": "footer #date, footer span, footer output",
+          "label": "élément en ligne #date"
+        }
+      ]
+    },
+    {
+      "id": "A.7",
+      "colonne": "A.7",
+      "etape": "Etape A",
+      "question": "7",
+      "sousQuestion": "",
+      "libelle": "Titre « Suivi de vol », style.css puis script.js reliés (suivi.html)",
+      "points": 1,
+      "regles": [
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "title",
+          "motif": "suivi",
+          "label": "titre Suivi de vol"
+        },
+        {
+          "type": "et",
+          "pts": 1,
+          "label": "style.css puis script.js reliés",
+          "regles": [
+            {
+              "type": "html",
+              "fichier": "suivi.html",
+              "selecteur": "link[href*=\"style.css\" i]",
+              "label": "style.css relié"
+            },
+            {
+              "type": "html",
+              "fichier": "suivi.html",
+              "selecteur": "script[src*=\"script.js\" i]",
+              "label": "script.js relié"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A.8",
+      "colonne": "A.8",
+      "etape": "Etape A",
+      "question": "8",
+      "sousQuestion": "",
+      "libelle": "onload=\"genererDefi()\" (suivi.html)",
+      "points": 0.5,
+      "regles": [
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "body",
+          "motif": "gener",
+          "label": "appel genererDefi() au chargement"
+        }
+      ]
+    },
+    {
+      "id": "A.9",
+      "colonne": "A.9",
+      "etape": "Etape A",
+      "question": "9",
+      "sousQuestion": "",
+      "libelle": "h2 Fiche de vol, formulaire, p#resultat vide",
+      "points": 1,
+      "regles": [
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "h2",
+          "motif": "fiche",
+          "label": "h2 Fiche de vol"
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "form",
+          "label": "formulaire"
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "#resultat",
+          "label": "p #resultat"
+        }
+      ]
+    },
+    {
+      "id": "A.10",
+      "colonne": "A.10",
+      "etape": "Etape A",
+      "question": "10",
+      "sousQuestion": "",
+      "libelle": "Tableau du formulaire : 6 lignes (pilote, modele+datalist, duree, defi, reponse, boutons)",
+      "points": 3,
+      "regles": [
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "#pilote",
+          "libelle": "nom.*pilote",
+          "label": "champ pilote"
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "#duree",
+          "libelle": "dur[ée]e",
+          "label": "champ durée"
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "#reponse",
+          "libelle": "initiale",
+          "label": "champ réponse"
+        },
+        {
+          "type": "et",
+          "pts": 1,
+          "label": "modèle + datalist (4 options)",
+          "regles": [
+            {
+              "type": "html",
+              "fichier": "suivi.html",
+              "selecteur": "#modele",
+              "libelle": "mod[èe]le"
+            },
+            {
+              "type": "html",
+              "fichier": "suivi.html",
+              "selecteur": "datalist option",
+              "min": 4
+            }
+          ]
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "#defi",
+          "libelle": "d[ée]fi",
+          "label": "élément #defi"
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "input[onclick*=\"gener\" i]",
+          "label": "bouton Nouveau défi"
+        },
+        {
+          "type": "html",
+          "pts": 1,
+          "fichier": "suivi.html",
+          "selecteur": "input[type=\"reset\" i]",
+          "label": "bouton Effacer"
+        }
+      ]
+    },
+    {
+      "id": "B.1",
+      "colonne": "B.1",
+      "etape": "Etape B",
+      "question": "1",
+      "sousQuestion": "",
+      "libelle": "Page, entête, logo, menu, liens (police, couleurs, dimensions)",
+      "points": 4,
+      "regles": [
+        {
+          "type": "css",
+          "pts": 1,
+          "propriete": "font-family|font",
+          "valeur": "verdana",
+          "label": "police Verdana"
+        },
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            "header"
+          ],
+          "propriete": "background-color|background",
+          "valeur": "0b2545",
+          "label": "fond entête #0B2545"
+        },
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            "#logo"
+          ],
+          "propriete": "border-radius",
+          "label": "logo circulaire"
+        },
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            "nav",
+            "a:hover"
+          ],
+          "propriete": "background-color|background",
+          "valeur": "eeb902",
+          "label": "liens au survol #EEB902"
+        }
+      ]
+    },
+    {
+      "id": "B.2",
+      "colonne": "B.2",
+      "etape": "Etape B",
+      "question": "2",
+      "sousQuestion": "",
+      "libelle": "Section (60%×60%, bordure) + h2 centré",
+      "points": 2,
+      "regles": [
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            "section"
+          ],
+          "propriete": "width",
+          "valeur": "60%",
+          "label": "section largeur 60%"
+        },
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            "section"
+          ],
+          "propriete": "border",
+          "valeur": "13315c",
+          "label": "bordure section #13315C"
+        }
+      ]
+    },
+    {
+      "id": "B.3",
+      "colonne": "B.3",
+      "etape": "Etape B",
+      "question": "3",
+      "sousQuestion": "",
+      "libelle": "Image accueil (id photo, 300px, bordure) + texte justifié",
+      "points": 1.5,
+      "regles": [
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            "#photo"
+          ],
+          "propriete": "border",
+          "valeur": "eeb902",
+          "label": "bordure #photo #EEB902"
+        },
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            ".texte"
+          ],
+          "propriete": "text-align",
+          "valeur": "justify",
+          "label": "texte justifié"
+        }
+      ]
+    },
+    {
+      "id": "B.4",
+      "colonne": "B.4",
+      "etape": "Etape B",
+      "question": "4",
+      "sousQuestion": "",
+      "libelle": "Champs, défi (couleurs), boutons (couleurs + survol), résultat",
+      "points": 5,
+      "regles": [
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            ".champ"
+          ],
+          "propriete": "width",
+          "valeur": "200px",
+          "label": "champs largeur 200px"
+        },
+        {
+          "type": "css",
+          "pts": 1,
+          "propriete": "background-color|background",
+          "valeur": "fff3c4",
+          "label": "champ au focus #FFF3C4"
+        },
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            "#defi"
+          ],
+          "propriete": "background-color|background",
+          "valeur": "0b2545",
+          "label": "fond #defi #0B2545"
+        },
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            ".bouton:hover"
+          ],
+          "propriete": "background-color|background",
+          "valeur": "c8102e",
+          "label": "boutons au survol #C8102E"
+        },
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            "#resultat"
+          ],
+          "propriete": "font-weight",
+          "valeur": "bold",
+          "label": "résultat en gras"
+        }
+      ]
+    },
+    {
+      "id": "B.5",
+      "colonne": "B.5",
+      "etape": "Etape B",
+      "question": "5",
+      "sousQuestion": "",
+      "libelle": "Iframe (100%×100%, scroll) + pied de page",
+      "points": 1.5,
+      "regles": [
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            "iframe",
+            "#cadre"
+          ],
+          "propriete": "width",
+          "valeur": "100%",
+          "label": "iframe largeur 100%"
+        },
+        {
+          "type": "css",
+          "pts": 1,
+          "selecteurs": [
+            "footer"
+          ],
+          "propriete": "background-color|background",
+          "valeur": "0b2545",
+          "label": "fond pied de page #0B2545"
+        }
+      ]
+    },
+    {
+      "id": "C.1",
+      "colonne": "C.1",
+      "etape": "Etape C",
+      "question": "1",
+      "sousQuestion": "",
+      "libelle": "Variable globale code",
+      "points": 1,
+      "regles": [
+        {
+          "type": "variable",
+          "pts": 1,
+          "fichier": "script.js",
+          "nom": "code",
+          "label": "variable globale code"
+        }
+      ]
+    },
+    {
+      "id": "C.2",
+      "colonne": "C.2",
+      "etape": "Etape C",
+      "question": "2",
+      "sousQuestion": "",
+      "libelle": "genererDefi() : 4 mots tirés au hasard, séparés par un espace",
+      "points": 3,
+      "regles": [
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "genererDefi",
+          "label": "fonction genererDefi"
+        },
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "genererDefi",
+          "motif": "random",
+          "label": "tirage aléatoire"
+        },
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "genererDefi",
+          "motif": "defi",
+          "label": "affichage dans #defi"
+        }
+      ]
+    },
+    {
+      "id": "C.3",
+      "colonne": "C.3",
+      "etape": "Etape C",
+      "question": "3",
+      "sousQuestion": "",
+      "libelle": "afficherDate() : mois en français + année sur 2 chiffres",
+      "points": 2,
+      "regles": [
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "afficherDate",
+          "motif": "janvier",
+          "label": "tableau des mois en français"
+        },
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "afficherDate",
+          "motif": "getfullyear|substring",
+          "label": "année sur 2 chiffres"
+        }
+      ]
+    },
+    {
+      "id": "C.4",
+      "colonne": "C.4",
+      "etape": "Etape C",
+      "question": "4",
+      "sousQuestion": "",
+      "libelle": "estValide() : pilote, modèle, durée, défi (4 contrôles + messages)",
+      "points": 6,
+      "regles": [
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "estValide",
+          "motif": "length",
+          "indice": "pilote",
+          "partielStandard": 0.5,
+          "label": "contrôle du nom du pilote"
+        },
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "estValide",
+          "motif": "mavic|phantom|mini|inspire",
+          "indice": "modele",
+          "partielStandard": 0.5,
+          "label": "contrôle du modèle"
+        },
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "estValide",
+          "motif": "autonomie",
+          "indice": "duree",
+          "partielStandard": 0.5,
+          "label": "contrôle de la durée (1..autonomie)"
+        },
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "estValide",
+          "motif": "defi|code|reponse",
+          "indice": "defi|reponse",
+          "partielStandard": 0.5,
+          "label": "contrôle du défi"
+        }
+      ]
+    },
+    {
+      "id": "C.5",
+      "colonne": "C.5",
+      "etape": "Etape C",
+      "question": "5",
+      "sousQuestion": "",
+      "libelle": "calculer() : 100 − durée×100/autonomie, arrondi, message",
+      "points": 2,
+      "regles": [
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "calculer",
+          "motif": "autonomie",
+          "indice": "100",
+          "partielStandard": 0.5,
+          "label": "formule de la batterie restante"
+        },
+        {
+          "type": "js",
+          "pts": 1,
+          "fichier": "script.js",
+          "fonction": "calculer",
+          "motif": "resultat",
+          "label": "affichage dans #resultat"
+        }
+      ]
+    }
+  ]
+}

@@ -100,22 +100,22 @@ const MARGE = (sel, label) => ({ type: 'css', fichier: CSS, propriete: 'margin(-
 const gauche = { type: 'ou', regles: [
   { type: 'css', fichier: CSS, propriete: 'float', valeur: 'left' },
   { type: 'css', fichier: CSS, propriete: 'display', valeur: 'inline-block|table-cell' },
-  { type: 'css', fichier: CSS, propriete: 'display', valeur: 'flex|grid', selecteurs: ['main'] }] };
+  { type: 'css', fichier: CSS, propriete: 'display', valeur: 'flex', selecteurs: ['main'] }] };
 add('P', 'Etape 2', '1', 'b', 'section à gauche (même ligne)', 0.5, [
   { ...gauche, label: 'Déclaration (gauche)', pts: 1, souple: MARGE('section|aside', 'mise en page par margin acceptée') },
   { type: 'ou', label: 'Application à section', pts: 1, souple: MARGE('section', 'margin sur section accepté'), regles: [
     { type: 'css', fichier: CSS, propriete: 'float', valeur: 'left', selecteurs: ['section'] },
     { type: 'css', fichier: CSS, propriete: 'display', valeur: 'inline-block|table-cell', selecteurs: ['section'] },
-    { type: 'css', fichier: CSS, propriete: 'display', valeur: 'flex|grid', selecteurs: ['main'] }] }]);
+    { type: 'css', fichier: CSS, propriete: 'display', valeur: 'flex', selecteurs: ['main'] }] }]);
 add('Q', 'Etape 2', '1', 'b', 'aside à droite de section', 0.5, [
   { type: 'ou', label: 'Déclaration (droite)', pts: 1, souple: MARGE('aside', 'margin-left sur aside accepté'), regles: [
     { type: 'css', fichier: CSS, propriete: 'float', valeur: 'right|left' },
     { type: 'css', fichier: CSS, propriete: 'display', valeur: 'inline-block|table-cell' },
-    { type: 'css', fichier: CSS, propriete: 'display', valeur: 'flex|grid', selecteurs: ['main'] }] },
+    { type: 'css', fichier: CSS, propriete: 'display', valeur: 'flex', selecteurs: ['main'] }] },
   { type: 'ou', label: 'Application à aside', pts: 1, souple: MARGE('aside', 'margin sur aside accepté'), regles: [
     { type: 'css', fichier: CSS, propriete: 'float', valeur: 'right|left', selecteurs: ['aside'] },
     { type: 'css', fichier: CSS, propriete: 'display', valeur: 'inline-block|table-cell', selecteurs: ['aside'] },
-    { type: 'css', fichier: CSS, propriete: 'display', valeur: 'flex|grid', selecteurs: ['main'] }] }]);
+    { type: 'css', fichier: CSS, propriete: 'display', valeur: 'flex', selecteurs: ['main'] }] }]);
 add('R', 'Etape 2', '1', 'b', 'ul : style de puce carré', 0.5, [
   { type: 'css', label: 'Déclaration list-style square', fichier: CSS, propriete: 'list-style(-type)?', valeur: 'square' },
   { type: 'css', label: 'Application ul', fichier: CSS, propriete: 'list-style(-type)?', valeur: 'square', selecteurs: ['ul|li'] }]);
